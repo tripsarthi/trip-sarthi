@@ -1,8 +1,12 @@
 import { getContent } from '@/lib/db';
 import { Shell } from '@/components/SiteChrome';
+import Img from '@/components/Img';
 
-export const revalidate = 0;
-export const metadata = { title: 'About — Trip Sarthi' };
+export const revalidate = 3600;
+export const metadata = {
+  title: 'About',
+  description: 'Trip Sarthi — honest, fixed-fare cab service across 150+ Indian cities. Verified drivers, 24×7 support, 12,000+ happy riders.',
+};
 
 export default async function About() {
   const c = await getContent();
@@ -20,7 +24,9 @@ export default async function About() {
         </section>
 
         <section className="wrap about-grid">
-          <div className="about-img"><img src={c.settings.about_image} alt="Trip Sarthi on the road" /></div>
+          <div className="about-img">
+            <Img src={c.settings.about_image} alt="Trip Sarthi on the road" sizes="(max-width: 1000px) 100vw, 50vw" />
+          </div>
           <div>
             <h2>{t.about_h2}</h2>
             <p>{t.about_p1}</p>

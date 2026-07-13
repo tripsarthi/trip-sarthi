@@ -1,8 +1,11 @@
 import { getContent } from '@/lib/db';
 import { Shell } from '@/components/SiteChrome';
 
-export const revalidate = 0;
-export const metadata = { title: 'Pricing — Trip Sarthi' };
+export const revalidate = 3600;
+export const metadata = {
+  title: 'Pricing',
+  description: 'Transparent per-kilometre cab rates and fixed one-way fares from Delhi to Agra, Jaipur, Manali and more. No surge, no hidden charges.',
+};
 
 export default async function Pricing() {
   const c = await getContent();

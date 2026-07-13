@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { serviceClient, anonClient } from '@/lib/db';
+
+// Purge the ISR cache for every public page so admin edits go live instantly.
+function purgeSiteCache() {
+  revalidatePath('/', 'layout');
+}
 
 const TABLES = {
   settings: { order: 'id' },
@@ -56,12 +62,14 @@ export async function POST(req) {
     const clean = rows.map(({ _dirty, _new, ...r }) => r);
     const { data, error } = await sb.from(table).upsert(clean).select();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    purgeSiteCache();
     return NextResponse.json({ data });
   }
 
   if (action === 'delete') {
     const { error } = await sb.from(table).delete().eq(cfg.pk || 'id', body.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    purgeSiteCache();
     return NextResponse.json({ ok: true });
   }
 

@@ -2,8 +2,11 @@ import { getContent } from '@/lib/db';
 import { Shell } from '@/components/SiteChrome';
 import ContactForm from '@/components/ContactForm';
 
-export const revalidate = 0;
-export const metadata = { title: 'Contact — Trip Sarthi' };
+export const revalidate = 3600;
+export const metadata = {
+  title: 'Contact',
+  description: 'Book a cab with Trip Sarthi — WhatsApp, call or send a quote request. Fastest reply on WhatsApp, 24×7.',
+};
 
 export default async function Contact() {
   const c = await getContent();

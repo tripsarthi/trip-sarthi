@@ -1,8 +1,12 @@
 import { getContent } from '@/lib/db';
 import { Shell } from '@/components/SiteChrome';
+import Img from '@/components/Img';
 
-export const revalidate = 0;
-export const metadata = { title: 'Gallery — Trip Sarthi' };
+export const revalidate = 3600;
+export const metadata = {
+  title: 'Gallery',
+  description: 'Trips, fleet and destinations — moments from the road with Trip Sarthi.',
+};
 
 export default async function Gallery() {
   const c = await getContent();
@@ -21,7 +25,8 @@ export default async function Gallery() {
           <div className="gallery-grid">
             {c.gallery.map((g) => (
               <div key={g.id} className={`gallery-item ${g.span || ''}`}>
-                <img src={g.image_url} alt={g.caption} />
+                <Img src={g.image_url} alt={g.caption}
+                  sizes="(max-width: 620px) 100vw, (max-width: 1000px) 50vw, 33vw" />
                 <div className="cap">{g.caption}</div>
               </div>
             ))}

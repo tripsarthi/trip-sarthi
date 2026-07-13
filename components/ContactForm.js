@@ -45,27 +45,30 @@ export default function ContactForm({ waNumber, title, sub }) {
       <form className="form-grid" onSubmit={submit}>
         <div className="form-2col">
           <div className="form-field">
-            <label>Name</label>
-            <input value={form.name} onChange={set('name')} placeholder="Your name" />
+            <label htmlFor="enq-name">Name</label>
+            <input id="enq-name" name="name" autoComplete="name" required
+              value={form.name} onChange={set('name')} placeholder="Your name" />
           </div>
           <div className="form-field">
-            <label>Phone</label>
-            <input value={form.phone} onChange={set('phone')} placeholder="+91" />
+            <label htmlFor="enq-phone">Phone</label>
+            <input id="enq-phone" name="phone" type="tel" autoComplete="tel" required
+              value={form.phone} onChange={set('phone')} placeholder="+91" />
           </div>
         </div>
         <div className="form-2col">
           <div className="form-field">
-            <label>From</label>
-            <input value={form.from_city} onChange={set('from_city')} placeholder="New Delhi" />
+            <label htmlFor="enq-from">From</label>
+            <input id="enq-from" name="from_city" value={form.from_city} onChange={set('from_city')} placeholder="New Delhi" />
           </div>
           <div className="form-field">
-            <label>To</label>
-            <input value={form.to_city} onChange={set('to_city')} placeholder="Destination" />
+            <label htmlFor="enq-to">To</label>
+            <input id="enq-to" name="to_city" value={form.to_city} onChange={set('to_city')} placeholder="Destination" />
           </div>
         </div>
         <div className="form-field">
-          <label>Message</label>
-          <textarea value={form.message} onChange={set('message')} placeholder="Travel date, passengers, car preference…" />
+          <label htmlFor="enq-msg">Message</label>
+          <textarea id="enq-msg" name="message" value={form.message} onChange={set('message')}
+            placeholder="Travel date, passengers, car preference…" />
         </div>
         {status && <div className={`form-msg ${status.ok ? 'ok' : 'err'}`}>{status.text}</div>}
         <button type="submit" disabled={busy} className="btn-yellow" style={{ padding: 16, fontSize: 16, border: 'none' }}>

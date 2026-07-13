@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { getContent } from '@/lib/db';
 import { Shell } from '@/components/SiteChrome';
+import Img from '@/components/Img';
 
-export const revalidate = 0;
+// Pages are statically cached; the admin API purges the cache on every save,
+// so edits still go live instantly.
+export const revalidate = 3600;
 
 // Renders "4.9★" with the star in brand yellow, like the design.
 function Stat({ v }) {
@@ -15,8 +18,21 @@ export default async function Home() {
   const t = c.t;
   const carsTop = c.cars.slice(1, 4);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'TaxiService',
+    name: 'Trip Sarthi',
+    description: t.home_sub,
+    telephone: c.settings.phone_e164,
+    email: c.email,
+    address: { '@type': 'PostalAddress', streetAddress: c.address, addressCountry: 'IN' },
+    areaServed: 'India',
+    url: process.env.NEXT_PUBLIC_SITE_URL || undefined,
+  };
+
   return (
     <Shell c={c} active="/">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="fade">
 
         {/* Hero */}
@@ -39,7 +55,10 @@ export default async function Home() {
               </div>
             </div>
             <div className="hero-visual">
-              <div className="hero-img"><img src={c.settings.hero_image} alt="Trip Sarthi cab on the road" /></div>
+              <div className="hero-img">
+                <Img src={c.settings.hero_image} alt="Trip Sarthi cab on the road" priority
+                  sizes="(max-width: 1000px) 100vw, 48vw" />
+              </div>
               <div className="hero-float">
                 <div className="icon">₹</div>
                 <div><div className="t">{t.home_float_t}</div><div className="s">{t.home_float_s}</div></div>
@@ -102,7 +121,8 @@ export default async function Home() {
               {carsTop.map((car) => (
                 <div key={car.id} className="car-card">
                   <div className="car-img">
-                    <img src={car.image_url} alt={car.name} />
+                    <Img src={car.image_url} alt={`${car.name} — ${car.model}`}
+                      sizes="(max-width: 620px) 100vw, (max-width: 1000px) 50vw, 33vw" />
                     <span className="car-tag">{car.tag}</span>
                   </div>
                   <div className="car-body">
@@ -128,7 +148,8 @@ export default async function Home() {
           <div className="cards-3">
             {c.routes.map((r) => (
               <a key={r.id} href={c.wa} target="_blank" rel="noopener" className="route-card">
-                <img src={r.image_url} alt={r.title} />
+                <Img src={r.image_url} alt={r.title}
+                  sizes="(max-width: 620px) 100vw, (max-width: 1000px) 50vw, 33vw" />
                 <div className="shade" />
                 <div className="info">
                   <div className="t">{r.title}</div>

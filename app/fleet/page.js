@@ -1,8 +1,12 @@
 import { getContent } from '@/lib/db';
 import { Shell } from '@/components/SiteChrome';
+import Img from '@/components/Img';
 
-export const revalidate = 0;
-export const metadata = { title: 'Our Fleet — Trip Sarthi' };
+export const revalidate = 3600;
+export const metadata = {
+  title: 'Our Fleet',
+  description: 'Hatchbacks, sedans, SUVs, Innova Crysta and Tempo Travellers with verified drivers. Clean, AC cars for every trip at fixed per-km rates.',
+};
 
 export default async function Fleet() {
   const c = await getContent();
@@ -22,7 +26,8 @@ export default async function Fleet() {
             {c.cars.map((car) => (
               <div key={car.id} className="car-card">
                 <div className="car-img tall">
-                  <img src={car.image_url} alt={car.name} />
+                  <Img src={car.image_url} alt={`${car.name} — ${car.model}`}
+                    sizes="(max-width: 620px) 100vw, (max-width: 1000px) 50vw, 33vw" />
                   <span className="car-tag">{car.tag}</span>
                 </div>
                 <div className="car-body" style={{ padding: 24 }}>

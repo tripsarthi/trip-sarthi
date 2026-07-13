@@ -189,12 +189,11 @@ function Dashboard({ sb, session, tab, setTab }) {
   useEffect(() => {
     (async () => {
       try {
+        const tables = ['enquiries', 'cars', 'routes', 'testimonials', 'gallery'];
+        const results = await Promise.all(tables.map((t) => api({ action: 'list', table: t })));
         const c = {};
-        for (const t of ['enquiries', 'cars', 'routes', 'testimonials', 'gallery']) {
-          const { data } = await api({ action: 'list', table: t });
-          c[t] = data.length;
-          if (t === 'enquiries') c.newEnquiries = data.filter((e) => e.status === 'new').length;
-        }
+        tables.forEach((t, i) => { c[t] = results[i].data.length; });
+        c.newEnquiries = results[0].data.filter((e) => e.status === 'new').length;
         setCounts(c);
       } catch { /* schema may not exist yet */ }
     })();

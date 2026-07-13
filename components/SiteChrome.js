@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const NAV = [
   ['Home', '/'],
@@ -25,16 +26,17 @@ export function Navbar({ c, active }) {
   return (
     <header className="navbar">
       <div className="wrap navbar-inner">
-        <Link href="/" className="brand" style={{ color: 'inherit' }}>
-          <img src="/logo.png" alt="Trip Sarthi" />
+        <Link href="/" className="brand" style={{ color: 'inherit' }} aria-label="Trip Sarthi — home">
+          <Image src="/logo.png" alt="Trip Sarthi logo" width={52} height={52} priority />
           <div style={{ lineHeight: 1 }}>
             <div className="brand-name">Trip <span>Sarthi</span></div>
             <div className="brand-sub">Cab &amp; Taxi Service</div>
           </div>
         </Link>
-        <nav className="nav-links">
+        <nav className="nav-links" aria-label="Main navigation">
           {NAV.map(([label, href]) => (
-            <Link key={href} href={href} className={active === href ? 'active' : ''}>{label}</Link>
+            <Link key={href} href={href} className={active === href ? 'active' : ''}
+              aria-current={active === href ? 'page' : undefined}>{label}</Link>
           ))}
         </nav>
         <a href={c.wa} target="_blank" rel="noopener" className="btn-book">{c.t.nav_cta}</a>
@@ -49,7 +51,7 @@ export function Footer({ c }) {
       <div className="footer-grid">
         <div>
           <div className="brand" style={{ marginBottom: 18 }}>
-            <img src="/logo.png" alt="Trip Sarthi" />
+            <Image src="/logo.png" alt="Trip Sarthi logo" width={50} height={50} />
             <div className="brand-name">Trip <span>Sarthi</span></div>
           </div>
           <p className="footer-about">{c.t.footer_blurb}</p>

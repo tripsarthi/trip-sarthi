@@ -369,6 +369,31 @@ a.contact-card:hover { box-shadow: 0 14px 30px rgba(20,17,10,.1); color: var(--i
   .footer-grid { grid-template-columns: 1fr; }
 }
 
+/* ---------- Route transition veil & loader ---------- */
+.route-loader, .route-veil {
+  position: fixed; inset: 0; z-index: 9999; background: var(--paper);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+}
+.route-veil { pointer-events: none; animation: veil-hide .4s ease .45s forwards; }
+@keyframes veil-hide { to { opacity: 0; visibility: hidden; } }
+.veil-logo {
+  width: 64px; height: 64px; border-radius: 16px; object-fit: cover;
+  box-shadow: 0 10px 30px rgba(20,17,10,.18); animation: veil-pulse 1.2s ease-in-out infinite;
+}
+@keyframes veil-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.veil-brand { font: 800 22px var(--sora); color: var(--ink); letter-spacing: -.01em; }
+.veil-brand span { color: var(--gold); }
+.veil-bar { width: 140px; height: 4px; border-radius: 999px; background: #ece7da; overflow: hidden; }
+.veil-bar span {
+  display: block; height: 100%; width: 40%; border-radius: 999px; background: var(--yellow);
+  animation: veil-slide 1s ease-in-out infinite;
+}
+@keyframes veil-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
+@media (prefers-reduced-motion: reduce) {
+  .route-veil { display: none; }
+  .veil-logo, .veil-bar span { animation: none; }
+}
+
 /* ---------- Admin ---------- */
 .admin-shell { min-height: 100vh; display: flex; background: #f6f4ee; }
 .admin-side { width: 230px; flex: none; background: var(--ink); color: #cfc8bc; display: flex; flex-direction: column; padding: 22px 14px; gap: 4px; }

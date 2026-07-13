@@ -1,12 +1,15 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
+import { DEFAULT_CONTENT } from '@/lib/defaults';
 
 const SECTIONS = [
   { key: 'overview', label: 'Overview', icon: '◈' },
   { key: 'enquiries', label: 'Enquiries', icon: '✉' },
+  { key: 'text', label: 'Website Text', icon: '✎' },
   { key: 'cars', label: 'Fleet & Rates', icon: '⛟' },
   { key: 'routes', label: 'Routes', icon: '➤' },
+  { key: 'sections', label: 'Page Sections', icon: '▤' },
   { key: 'testimonials', label: 'Testimonials', icon: '★' },
   { key: 'gallery', label: 'Gallery', icon: '▣' },
   { key: 'settings', label: 'Site Settings', icon: '⚙' },
@@ -30,6 +33,18 @@ const COLUMNS = {
     ['caption', 'Caption'], ['image_url', 'Image URL'], ['span', 'Size (blank / feature / wide / tall)'],
     ['sort', 'Order', 'number'],
   ],
+  services: [
+    ['num', 'No.'], ['title', 'Title'], ['description', 'Description', 'textarea'], ['sort', 'Order', 'number'],
+  ],
+  features: [
+    ['title', 'Title'], ['sub', 'Subtitle'], ['sort', 'Order', 'number'],
+  ],
+  steps: [
+    ['num', 'No.'], ['title', 'Title'], ['description', 'Description', 'textarea'], ['sort', 'Order', 'number'],
+  ],
+  brand_values: [
+    ['num', 'No.'], ['title', 'Title'], ['description', 'Description', 'textarea'], ['sort', 'Order', 'number'],
+  ],
 };
 
 const NEW_ROW = {
@@ -37,7 +52,66 @@ const NEW_ROW = {
   routes: { title: 'Delhi → ', meta: '', price: 'from ₹', image_url: '', sort: 99 },
   testimonials: { name: '', meta: '', stars: 5, quote: '', sort: 99 },
   gallery: { caption: '', image_url: '', span: '', sort: 99 },
+  services: { num: '05', title: 'New service', description: '', sort: 99 },
+  features: { title: 'New feature', sub: '', sort: 99 },
+  steps: { num: '05', title: 'New step', description: '', sort: 99 },
+  brand_values: { num: '04', title: 'New value', description: '', sort: 99 },
 };
+
+// Grouped, human-labelled view of every text block on the site.
+const TEXT_GROUPS = [
+  { name: 'Announcement bar & navbar', keys: [
+    ['ann_1', 'Announcement — item 1'], ['ann_2', 'Announcement — item 2'], ['nav_cta', 'Navbar button label'],
+  ]},
+  { name: 'Home — Hero', keys: [
+    ['home_badge', 'Badge'], ['home_h1', 'Headline (line breaks respected)', 'textarea'],
+    ['home_h1_accent', 'Headline highlighted word'], ['home_sub', 'Subtitle', 'textarea'],
+    ['home_cta_wa', 'WhatsApp button'], ['home_float_t', 'Floating card — title'], ['home_float_s', 'Floating card — subtitle'],
+    ['home_stat1_v', 'Stat 1 — value'], ['home_stat1_l', 'Stat 1 — label'],
+    ['home_stat2_v', 'Stat 2 — value'], ['home_stat2_l', 'Stat 2 — label'],
+    ['home_stat3_v', 'Stat 3 — value'], ['home_stat3_l', 'Stat 3 — label'],
+  ]},
+  { name: 'Home — Quote bar', keys: [
+    ['quote_pickup', 'Pickup value'], ['quote_drop', 'Drop placeholder'], ['quote_trip', 'Trip type value'],
+    ['quote_cta', 'Button label'], ['quote_note', 'Note below bar', 'textarea'],
+  ]},
+  { name: 'Home — Section headings', keys: [
+    ['services_kicker', 'Services — kicker'], ['services_title', 'Services — title'],
+    ['fleet_kicker', 'Fleet — kicker'], ['fleet_title', 'Fleet — title'], ['fleet_link', 'Fleet — link label'],
+    ['routes_kicker', 'Routes — kicker'], ['routes_title', 'Routes — title'],
+    ['how_kicker', 'How it works — kicker'], ['how_title', 'How it works — title'],
+    ['reviews_kicker', 'Reviews — kicker'], ['reviews_title', 'Reviews — title'],
+  ]},
+  { name: 'Home — Offer banner', keys: [
+    ['offer_kicker', 'Kicker'], ['offer_title', 'Title'], ['offer_sub', 'Subtitle', 'textarea'], ['offer_cta', 'Button label'],
+  ]},
+  { name: 'About page', keys: [
+    ['about_kicker', 'Kicker'], ['about_h1', 'Headline', 'textarea'], ['about_h2', 'Story — heading'],
+    ['about_p1', 'Story — paragraph 1', 'textarea'], ['about_p2', 'Story — paragraph 2', 'textarea'],
+    ['about_stat1_v', 'Stat 1 — value'], ['about_stat1_l', 'Stat 1 — label'],
+    ['about_stat2_v', 'Stat 2 — value'], ['about_stat2_l', 'Stat 2 — label'],
+    ['about_stat3_v', 'Stat 3 — value'], ['about_stat3_l', 'Stat 3 — label'],
+    ['about_stat4_v', 'Stat 4 — value'], ['about_stat4_l', 'Stat 4 — label'],
+    ['values_title', 'Values section — title'],
+  ]},
+  { name: 'Fleet page', keys: [
+    ['fleetpage_kicker', 'Kicker'], ['fleetpage_h1', 'Headline'], ['fleetpage_sub', 'Subtitle', 'textarea'],
+  ]},
+  { name: 'Pricing page', keys: [
+    ['pricing_kicker', 'Kicker'], ['pricing_h1', 'Headline'], ['pricing_sub', 'Subtitle', 'textarea'],
+    ['pricing_rates_title', 'Rates table — heading'], ['pricing_fares_title', 'Fares grid — heading'],
+  ]},
+  { name: 'Gallery page', keys: [
+    ['gallerypage_kicker', 'Kicker'], ['gallerypage_h1', 'Headline'], ['gallerypage_sub', 'Subtitle', 'textarea'],
+  ]},
+  { name: 'Contact page', keys: [
+    ['contact_kicker', 'Kicker'], ['contact_h1', 'Headline'], ['contact_sub', 'Subtitle', 'textarea'],
+    ['form_title', 'Form — title'], ['form_sub', 'Form — subtitle', 'textarea'],
+  ]},
+  { name: 'Footer', keys: [
+    ['footer_blurb', 'About blurb', 'textarea'], ['footer_legal', 'Legal line'],
+  ]},
+];
 
 export default function Admin() {
   const sb = supabaseBrowser();
@@ -149,7 +223,18 @@ function Dashboard({ sb, session, tab, setTab }) {
       <main className="admin-main">
         {tab === 'overview' && <Overview counts={counts} setTab={setTab} />}
         {tab === 'enquiries' && <Enquiries api={api} />}
+        {tab === 'text' && <ContentEditor api={api} />}
         {['cars', 'routes', 'testimonials', 'gallery'].includes(tab) && <TableEditor key={tab} table={tab} api={api} />}
+        {tab === 'sections' && (
+          <>
+            <h1 className="admin-title">Page Sections</h1>
+            <p className="admin-sub">The four list sections: services & trust points (home), booking steps (home), and company values (about).</p>
+            <TableEditor table="services" api={api} compact />
+            <TableEditor table="features" api={api} compact />
+            <TableEditor table="steps" api={api} compact />
+            <TableEditor table="brand_values" api={api} compact />
+          </>
+        )}
         {tab === 'settings' && <Settings api={api} />}
       </main>
     </div>
@@ -232,7 +317,7 @@ function Enquiries({ api }) {
   );
 }
 
-function TableEditor({ table, api }) {
+function TableEditor({ table, api, compact }) {
   const cols = COLUMNS[table];
   const [rows, setRows] = useState(null);
   const [err, setErr] = useState(null);
@@ -282,15 +367,22 @@ function TableEditor({ table, api }) {
     } catch (e) { setNote({ ok: false, text: e.message }); }
   }
 
-  const titles = { cars: 'Fleet & Rates', routes: 'Routes', testimonials: 'Testimonials', gallery: 'Gallery' };
+  const titles = {
+    cars: 'Fleet & Rates', routes: 'Routes', testimonials: 'Testimonials', gallery: 'Gallery',
+    services: 'Services (home)', features: 'Trust points (home)', steps: 'How it works (home)', brand_values: 'Values (about)',
+  };
 
   if (err) return <SchemaHint title={titles[table]} err={err} />;
   if (!rows) return <p className="admin-note">Loading…</p>;
 
   return (
     <>
-      <h1 className="admin-title">{titles[table]}</h1>
-      <p className="admin-sub">Edit cells, then hit Save. Order controls position on the site.</p>
+      {compact
+        ? <h2 style={{ font: '800 19px var(--sora)', color: 'var(--ink)', margin: '26px 0 12px' }}>{titles[table]}</h2>
+        : <>
+            <h1 className="admin-title">{titles[table]}</h1>
+            <p className="admin-sub">Edit cells, then hit Save. Order controls position on the site.</p>
+          </>}
       <div className="admin-toolbar">
         <button className="admin-btn" onClick={saveAll} disabled={busy}>Save changes</button>
         <button className="admin-btn ghost" onClick={addRow} disabled={busy}>+ Add row</button>
@@ -375,6 +467,74 @@ function Settings({ api }) {
           </div>
         </div>
       </div>
+    </>
+  );
+}
+
+function ContentEditor({ api }) {
+  const [vals, setVals] = useState(null); // key -> value
+  const [dirty, setDirty] = useState({}); // key -> true
+  const [err, setErr] = useState(null);
+  const [note, setNote] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    api({ action: 'list', table: 'content' })
+      .then(({ data }) => {
+        const merged = { ...DEFAULT_CONTENT };
+        for (const row of data) merged[row.key] = row.value;
+        setVals(merged);
+      })
+      .catch((e) => setErr(e.message));
+  }, [api]);
+
+  if (err) return <SchemaHint title="Website Text" err={err} />;
+  if (!vals) return <p className="admin-note">Loading…</p>;
+
+  function edit(key, value) {
+    setVals({ ...vals, [key]: value });
+    setDirty({ ...dirty, [key]: true });
+  }
+
+  async function save() {
+    const rows = Object.keys(dirty).map((key) => ({ key, value: vals[key] }));
+    if (rows.length === 0) { setNote({ ok: true, text: 'Nothing to save.' }); return; }
+    setBusy(true); setNote(null);
+    try {
+      await api({ action: 'upsert', table: 'content', rows });
+      setDirty({});
+      setNote({ ok: true, text: `Saved ${rows.length} text block(s). Live on the site now.` });
+    } catch (e) { setNote({ ok: false, text: e.message }); }
+    setBusy(false);
+  }
+
+  const dirtyCount = Object.keys(dirty).length;
+
+  return (
+    <>
+      <h1 className="admin-title">Website Text</h1>
+      <p className="admin-sub">Every heading, paragraph and label on the site — edit and save.</p>
+      <div className="admin-toolbar" style={{ position: 'sticky', top: 0, zIndex: 5, background: '#f6f4ee', padding: '8px 0' }}>
+        <button className="admin-btn" onClick={save} disabled={busy}>
+          {busy ? 'Saving…' : `Save changes${dirtyCount ? ` (${dirtyCount})` : ''}`}
+        </button>
+        {note && <span className={`admin-note ${note.ok ? 'ok' : 'err'}`}>{note.text}</span>}
+      </div>
+      {TEXT_GROUPS.map((g) => (
+        <div key={g.name} className="admin-card">
+          <div style={{ font: '800 15px var(--sora)', color: 'var(--ink)', marginBottom: 14 }}>{g.name}</div>
+          <div className="form-grid" style={{ gap: 12 }}>
+            {g.keys.map(([key, label, type]) => (
+              <div key={key} className="form-field">
+                <label>{label}</label>
+                {type === 'textarea'
+                  ? <textarea className="admin-textarea" style={{ marginTop: 6 }} value={vals[key] ?? ''} onChange={(e) => edit(key, e.target.value)} />
+                  : <input className="admin-input" style={{ marginTop: 6 }} value={vals[key] ?? ''} onChange={(e) => edit(key, e.target.value)} />}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </>
   );
 }

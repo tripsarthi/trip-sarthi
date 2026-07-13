@@ -14,8 +14,10 @@ const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABA
   auth: { persistSession: false },
 });
 
-const { DEFAULT_SETTINGS, DEFAULT_CARS, DEFAULT_ROUTES, DEFAULT_TESTIMONIALS, DEFAULT_GALLERY } =
-  await import('../lib/defaults.js');
+const {
+  DEFAULT_SETTINGS, DEFAULT_CARS, DEFAULT_ROUTES, DEFAULT_TESTIMONIALS, DEFAULT_GALLERY,
+  DEFAULT_SERVICES, DEFAULT_FEATURES, DEFAULT_STEPS, DEFAULT_VALUES, DEFAULT_CONTENT,
+} = await import('../lib/defaults.js');
 
 async function seedTable(table, rows) {
   const { data, error } = await sb.from(table).select('id').limit(1);
@@ -38,5 +40,15 @@ await seedTable('cars', DEFAULT_CARS);
 await seedTable('routes', DEFAULT_ROUTES);
 await seedTable('testimonials', DEFAULT_TESTIMONIALS);
 await seedTable('gallery', DEFAULT_GALLERY);
+await seedTable('services', DEFAULT_SERVICES);
+await seedTable('features', DEFAULT_FEATURES);
+await seedTable('steps', DEFAULT_STEPS);
+await seedTable('brand_values', DEFAULT_VALUES);
+
+// content is keyed, so upsert (fills any missing keys on re-run)
+const contentRows = Object.entries(DEFAULT_CONTENT).map(([key, value]) => ({ key, value }));
+const { error: cErr } = await sb.from('content').upsert(contentRows, { ignoreDuplicates: true });
+if (cErr) throw new Error(`content: ${cErr.message}`);
+console.log(`+ content: ensured ${contentRows.length} text blocks`);
 
 console.log('\nDone. The site now serves content from Supabase.');

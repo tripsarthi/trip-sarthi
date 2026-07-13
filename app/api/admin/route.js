@@ -7,6 +7,11 @@ const TABLES = {
   routes: { order: 'sort' },
   testimonials: { order: 'sort' },
   gallery: { order: 'sort' },
+  services: { order: 'sort' },
+  features: { order: 'sort' },
+  steps: { order: 'sort' },
+  brand_values: { order: 'sort' },
+  content: { order: 'key', pk: 'key' },
   enquiries: { order: 'created_at', desc: true },
 };
 
@@ -55,7 +60,7 @@ export async function POST(req) {
   }
 
   if (action === 'delete') {
-    const { error } = await sb.from(table).delete().eq('id', body.id);
+    const { error } = await sb.from(table).delete().eq(cfg.pk || 'id', body.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
   }

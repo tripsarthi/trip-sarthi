@@ -11,9 +11,9 @@ export default async function Fleet() {
       <div className="fade">
         <section className="page-hero">
           <div className="wrap page-hero-inner">
-            <div className="kicker">Our fleet</div>
-            <h1>Clean, comfortable cars for every trip</h1>
-            <p>Per-kilometre rates are indicative — send us your route on WhatsApp for a fixed, all-inclusive quote.</p>
+            <div className="kicker">{c.t.fleetpage_kicker}</div>
+            <h1>{c.t.fleetpage_h1}</h1>
+            <p>{c.t.fleetpage_sub}</p>
           </div>
         </section>
 

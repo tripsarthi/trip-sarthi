@@ -11,14 +11,14 @@ export default async function Pricing() {
       <div className="fade">
         <section className="page-hero">
           <div className="wrap page-hero-inner">
-            <div className="kicker">Pricing</div>
-            <h1>Transparent fares, always</h1>
-            <p>Sample rates below. Tolls, parking and state taxes may apply on outstation trips — all confirmed upfront in your quote.</p>
+            <div className="kicker">{c.t.pricing_kicker}</div>
+            <h1>{c.t.pricing_h1}</h1>
+            <p>{c.t.pricing_sub}</p>
           </div>
         </section>
 
         <section style={{ maxWidth: 1120, margin: '0 auto', padding: '72px 24px' }}>
-          <h2 className="pricing-h2">Per-kilometre rates</h2>
+          <h2 className="pricing-h2">{c.t.pricing_rates_title}</h2>
           <div className="rate-table">
             <div className="rate-head">
               <div>Car type</div><div>Model</div><div>Seats</div><div>Rate/km</div><div />
@@ -34,7 +34,7 @@ export default async function Pricing() {
             ))}
           </div>
 
-          <h2 className="pricing-h2 later">Popular outstation fares (one-way)</h2>
+          <h2 className="pricing-h2 later">{c.t.pricing_fares_title}</h2>
           <div className="cards-3" style={{ gap: 20 }}>
             {c.routes.map((r) => (
               <div key={r.id} className="fare-card">

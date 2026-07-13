@@ -1,12 +1,18 @@
 import Link from 'next/link';
 import { getContent } from '@/lib/db';
 import { Shell } from '@/components/SiteChrome';
-import { SERVICES, FEATURES, STEPS } from '@/lib/defaults';
 
 export const revalidate = 0;
 
+// Renders "4.9★" with the star in brand yellow, like the design.
+function Stat({ v }) {
+  const star = v.endsWith('★');
+  return star ? <>{v.slice(0, -1)}<span>★</span></> : v;
+}
+
 export default async function Home() {
   const c = await getContent();
+  const t = c.t;
   const carsTop = c.cars.slice(1, 4);
 
   return (
@@ -17,26 +23,26 @@ export default async function Home() {
         <section className="hero">
           <div className="wrap hero-grid">
             <div>
-              <div className="hero-badge"><span className="dot" />Trusted by 12,000+ travellers</div>
-              <h1>Reliable cabs for<br />every journey<br />across <span>India.</span></h1>
-              <p className="hero-sub">Airport transfers, outstation trips and local rentals — booked in one message. Fixed fares, verified drivers, no surprises.</p>
+              <div className="hero-badge"><span className="dot" />{t.home_badge}</div>
+              <h1 style={{ whiteSpace: 'pre-line' }}>{t.home_h1} <span>{t.home_h1_accent}</span></h1>
+              <p className="hero-sub">{t.home_sub}</p>
               <div className="hero-ctas">
-                <a href={c.wa} target="_blank" rel="noopener" className="btn-dark">Book on WhatsApp →</a>
+                <a href={c.wa} target="_blank" rel="noopener" className="btn-dark">{t.home_cta_wa}</a>
                 <a href={c.tel} className="btn-outline">Call {c.phone}</a>
               </div>
               <div className="hero-stats">
-                <div><div className="v">4.9<span>★</span></div><div className="l">Avg. rating</div></div>
+                <div><div className="v"><Stat v={t.home_stat1_v} /></div><div className="l">{t.home_stat1_l}</div></div>
                 <div className="div" />
-                <div><div className="v">12k+</div><div className="l">Trips completed</div></div>
+                <div><div className="v"><Stat v={t.home_stat2_v} /></div><div className="l">{t.home_stat2_l}</div></div>
                 <div className="div" />
-                <div><div className="v">24×7</div><div className="l">Support</div></div>
+                <div><div className="v"><Stat v={t.home_stat3_v} /></div><div className="l">{t.home_stat3_l}</div></div>
               </div>
             </div>
             <div className="hero-visual">
               <div className="hero-img"><img src={c.settings.hero_image} alt="Trip Sarthi cab on the road" /></div>
               <div className="hero-float">
                 <div className="icon">₹</div>
-                <div><div className="t">Fixed, upfront fares</div><div className="s">Know the price before you ride</div></div>
+                <div><div className="t">{t.home_float_t}</div><div className="s">{t.home_float_s}</div></div>
               </div>
             </div>
           </div>
@@ -44,20 +50,20 @@ export default async function Home() {
           {/* Quote bar */}
           <div className="quote-wrap">
             <div className="quote-bar">
-              <div><div className="lbl">Pickup</div><div className="field">New Delhi</div></div>
-              <div><div className="lbl">Drop</div><div className="field ph">Where to?</div></div>
-              <div><div className="lbl">Trip type</div><div className="field">Outstation · One-way</div></div>
-              <a href={c.wa} target="_blank" rel="noopener" className="btn-yellow">Check fare</a>
+              <div><div className="lbl">Pickup</div><div className="field">{t.quote_pickup}</div></div>
+              <div><div className="lbl">Drop</div><div className="field ph">{t.quote_drop}</div></div>
+              <div><div className="lbl">Trip type</div><div className="field">{t.quote_trip}</div></div>
+              <a href={c.wa} target="_blank" rel="noopener" className="btn-yellow">{t.quote_cta}</a>
             </div>
-            <div className="quote-note">No app, no login — just message us your route and we&apos;ll send a fixed quote.</div>
+            <div className="quote-note">{t.quote_note}</div>
           </div>
         </section>
 
         {/* Trust features */}
         <section className="features">
           <div className="wrap features-grid">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="feature">
+            {c.features.map((f) => (
+              <div key={f.id} className="feature">
                 <span className="check">✓</span>
                 <div><div className="t">{f.title}</div><div className="s">{f.sub}</div></div>
               </div>
@@ -68,15 +74,15 @@ export default async function Home() {
         {/* Services */}
         <section className="wrap section">
           <div className="section-head">
-            <div className="kicker">What we offer</div>
-            <h2 className="h2">Every kind of ride, sorted</h2>
+            <div className="kicker">{t.services_kicker}</div>
+            <h2 className="h2">{t.services_title}</h2>
           </div>
           <div className="services-grid">
-            {SERVICES.map((s) => (
-              <div key={s.num} className="service-card">
+            {c.services.map((s) => (
+              <div key={s.id} className="service-card">
                 <div className="num">{s.num}</div>
                 <div className="t">{s.title}</div>
-                <div className="d">{s.desc}</div>
+                <div className="d">{s.description}</div>
               </div>
             ))}
           </div>
@@ -87,10 +93,10 @@ export default async function Home() {
           <div className="wrap section">
             <div className="fleet-head">
               <div>
-                <div className="kicker">Our fleet</div>
-                <h2 className="h2">Pick the ride that fits</h2>
+                <div className="kicker">{t.fleet_kicker}</div>
+                <h2 className="h2">{t.fleet_title}</h2>
               </div>
-              <Link href="/fleet" className="link-under">View all cars →</Link>
+              <Link href="/fleet" className="link-under">{t.fleet_link}</Link>
             </div>
             <div className="cards-3">
               {carsTop.map((car) => (
@@ -116,8 +122,8 @@ export default async function Home() {
         {/* Popular routes */}
         <section className="wrap section">
           <div className="section-head">
-            <div className="kicker">Popular routes</div>
-            <h2 className="h2">Loved journeys from Delhi</h2>
+            <div className="kicker">{t.routes_kicker}</div>
+            <h2 className="h2">{t.routes_title}</h2>
           </div>
           <div className="cards-3">
             {c.routes.map((r) => (
@@ -138,15 +144,15 @@ export default async function Home() {
         <section className="dark-band">
           <div className="wrap section">
             <div className="section-head">
-              <div className="kicker on-dark">How it works</div>
-              <h2 className="h2">Booked in four easy steps</h2>
+              <div className="kicker on-dark">{t.how_kicker}</div>
+              <h2 className="h2">{t.how_title}</h2>
             </div>
             <div className="grid-4">
-              {STEPS.map((st) => (
-                <div key={st.num} className="dark-card">
+              {c.steps.map((st) => (
+                <div key={st.id} className="dark-card">
                   <div className="num">{st.num}</div>
                   <div className="t">{st.title}</div>
-                  <div className="d">{st.desc}</div>
+                  <div className="d">{st.description}</div>
                 </div>
               ))}
             </div>
@@ -157,11 +163,11 @@ export default async function Home() {
         <section className="wrap" style={{ paddingTop: 80, paddingBottom: 80 }}>
           <div className="offer">
             <div>
-              <div className="kick">Limited period offer</div>
-              <div className="head">Up to 30% off on round trips</div>
-              <div className="sub">Book a return outstation journey this month and save on your total fare.</div>
+              <div className="kick">{t.offer_kicker}</div>
+              <div className="head">{t.offer_title}</div>
+              <div className="sub">{t.offer_sub}</div>
             </div>
-            <a href={c.wa} target="_blank" rel="noopener" className="btn-dark">Claim offer →</a>
+            <a href={c.wa} target="_blank" rel="noopener" className="btn-dark">{t.offer_cta}</a>
           </div>
         </section>
 
@@ -169,17 +175,17 @@ export default async function Home() {
         <section className="band" style={{ borderBottom: 'none' }}>
           <div className="wrap section">
             <div className="section-head">
-              <div className="kicker">Reviews</div>
-              <h2 className="h2">What riders say</h2>
+              <div className="kicker">{t.reviews_kicker}</div>
+              <h2 className="h2">{t.reviews_title}</h2>
             </div>
             <div className="cards-3">
-              {c.testimonials.map((t) => (
-                <div key={t.id} className="testi-card">
-                  <div className="stars">{'★'.repeat(t.stars)}</div>
-                  <p>{t.quote}</p>
+              {c.testimonials.map((tm) => (
+                <div key={tm.id} className="testi-card">
+                  <div className="stars">{'★'.repeat(tm.stars)}</div>
+                  <p>{tm.quote}</p>
                   <div className="testi-foot">
-                    <div className="avatar">{t.name[0]}</div>
-                    <div><div className="n">{t.name}</div><div className="m">{t.meta}</div></div>
+                    <div className="avatar">{tm.name[0]}</div>
+                    <div><div className="n">{tm.name}</div><div className="m">{tm.meta}</div></div>
                   </div>
                 </div>
               ))}

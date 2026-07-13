@@ -12,9 +12,9 @@ const NAV = [
 export function Announce({ c }) {
   return (
     <div className="announce">
-      <span className="dot-item"><span className="dot" />24×7 on-call booking across India</span>
+      <span className="dot-item"><span className="dot" />{c.t.ann_1}</span>
       <span className="sep">•</span>
-      <span>Fixed fares — no surge pricing</span>
+      <span>{c.t.ann_2}</span>
       <span className="sep">•</span>
       <a href={c.tel}>Call {c.phone}</a>
     </div>
@@ -37,7 +37,7 @@ export function Navbar({ c, active }) {
             <Link key={href} href={href} className={active === href ? 'active' : ''}>{label}</Link>
           ))}
         </nav>
-        <a href={c.wa} target="_blank" rel="noopener" className="btn-book">Book Now</a>
+        <a href={c.wa} target="_blank" rel="noopener" className="btn-book">{c.t.nav_cta}</a>
       </div>
     </header>
   );
@@ -52,7 +52,7 @@ export function Footer({ c }) {
             <img src="/logo.png" alt="Trip Sarthi" />
             <div className="brand-name">Trip <span>Sarthi</span></div>
           </div>
-          <p className="footer-about">Reliable cabs and taxi service across India. Fixed fares, verified drivers, on the road 24×7.</p>
+          <p className="footer-about">{c.t.footer_blurb}</p>
         </div>
         <div>
           <div className="footer-h">Pages</div>
@@ -63,7 +63,7 @@ export function Footer({ c }) {
         <div>
           <div className="footer-h">Services</div>
           <div className="footer-links">
-            <div>Airport Transfers</div><div>Outstation Trips</div><div>Local Rentals</div><div>Corporate Travel</div>
+            {c.services.map((s) => <div key={s.id}>{s.title}</div>)}
           </div>
         </div>
         <div>
@@ -79,7 +79,7 @@ export function Footer({ c }) {
       <div className="footer-bottom">
         <div className="footer-bottom-inner">
           <div>© {new Date().getFullYear()} Trip Sarthi. All rights reserved.</div>
-          <div>Privacy · Terms · Refund Policy</div>
+          <div>{c.t.footer_legal}</div>
         </div>
       </div>
     </footer>

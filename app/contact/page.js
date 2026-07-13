@@ -12,9 +12,9 @@ export default async function Contact() {
       <div className="fade">
         <section className="page-hero">
           <div className="wrap page-hero-inner">
-            <div className="kicker">Contact</div>
-            <h1>Let&apos;s plan your trip</h1>
-            <p>Reach out any time — we reply fastest on WhatsApp. Tell us your route and travel date for an instant quote.</p>
+            <div className="kicker">{c.t.contact_kicker}</div>
+            <h1>{c.t.contact_h1}</h1>
+            <p>{c.t.contact_sub}</p>
           </div>
         </section>
 
@@ -38,7 +38,7 @@ export default async function Contact() {
             </div>
           </div>
 
-          <ContactForm waNumber={c.settings.phone_e164} />
+          <ContactForm waNumber={c.settings.phone_e164} title={c.t.form_title} sub={c.t.form_sub} />
         </section>
       </div>
     </Shell>

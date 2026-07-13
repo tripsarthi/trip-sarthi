@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-export default function ContactForm({ waNumber }) {
+export default function ContactForm({ waNumber, title, sub }) {
   const [form, setForm] = useState({ name: '', phone: '', from_city: 'New Delhi', to_city: '', message: '' });
   const [status, setStatus] = useState(null); // {ok, text}
   const [busy, setBusy] = useState(false);
@@ -40,8 +40,8 @@ export default function ContactForm({ waNumber }) {
 
   return (
     <div className="enquiry-panel">
-      <h2>Request a quote</h2>
-      <p className="sub">Fill in your details — we&apos;ll receive your enquiry instantly. You can also send it straight to WhatsApp.</p>
+      <h2>{title || 'Request a quote'}</h2>
+      <p className="sub">{sub || 'Fill in your details and send your enquiry.'}</p>
       <form className="form-grid" onSubmit={submit}>
         <div className="form-2col">
           <div className="form-field">

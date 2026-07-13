@@ -11,9 +11,9 @@ export default async function Gallery() {
       <div className="fade">
         <section className="page-hero">
           <div className="wrap page-hero-inner">
-            <div className="kicker">Gallery</div>
-            <h1>Moments from the road</h1>
-            <p>Trips, fleet and destinations — a glimpse of journeys with Trip Sarthi.</p>
+            <div className="kicker">{c.t.gallerypage_kicker}</div>
+            <h1>{c.t.gallerypage_h1}</h1>
+            <p>{c.t.gallerypage_sub}</p>
           </div>
         </section>
 

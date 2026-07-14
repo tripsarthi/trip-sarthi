@@ -1,25 +1,20 @@
 import { getContent } from '@/lib/db';
-import { Shell } from '@/components/SiteChrome';
+import { Shell, PageBanner } from '@/components/SiteChrome';
 import ContactForm from '@/components/ContactForm';
 
 export const revalidate = 3600;
 export const metadata = {
-  title: 'Contact',
+  title: 'Contact Us',
   description: 'Book a cab with Trip Sarthi — WhatsApp, call or send a quote request. Fastest reply on WhatsApp, 24×7.',
 };
 
 export default async function Contact() {
   const c = await getContent();
+  const t = c.t;
   return (
     <Shell c={c} active="/contact">
       <div className="fade">
-        <section className="page-hero">
-          <div className="wrap page-hero-inner">
-            <div className="kicker">{c.t.contact_kicker}</div>
-            <h1>{c.t.contact_h1}</h1>
-            <p>{c.t.contact_sub}</p>
-          </div>
-        </section>
+        <PageBanner title={t.contact_h1} sub={t.contact_sub} />
 
         <section className="wrap contact-grid">
           <div className="contact-cards">
@@ -37,11 +32,11 @@ export default async function Contact() {
             </a>
             <div className="contact-card">
               <span className="icon soft">◉</span>
-              <div><div className="t">Office</div><div className="s">{c.address}</div></div>
+              <div><div className="t">Head Office</div><div className="s">{c.address}</div></div>
             </div>
           </div>
 
-          <ContactForm waNumber={c.settings.phone_e164} title={c.t.form_title} sub={c.t.form_sub} />
+          <ContactForm waNumber={c.settings.phone_e164} title={t.form_title} sub={t.form_sub} />
         </section>
       </div>
     </Shell>

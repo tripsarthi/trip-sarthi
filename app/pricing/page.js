@@ -1,27 +1,22 @@
 import { getContent } from '@/lib/db';
-import { Shell } from '@/components/SiteChrome';
+import { Shell, PageBanner, OfferBand } from '@/components/SiteChrome';
 
 export const revalidate = 3600;
 export const metadata = {
-  title: 'Pricing',
+  title: 'Price',
   description: 'Transparent per-kilometre cab rates and fixed one-way fares from Delhi to Agra, Jaipur, Manali and more. No surge, no hidden charges.',
 };
 
 export default async function Pricing() {
   const c = await getContent();
+  const t = c.t;
   return (
     <Shell c={c} active="/pricing">
       <div className="fade">
-        <section className="page-hero">
-          <div className="wrap page-hero-inner">
-            <div className="kicker">{c.t.pricing_kicker}</div>
-            <h1>{c.t.pricing_h1}</h1>
-            <p>{c.t.pricing_sub}</p>
-          </div>
-        </section>
+        <PageBanner title={t.pricing_h1} sub={t.pricing_sub} />
 
-        <section style={{ maxWidth: 1120, margin: '0 auto', padding: '72px 24px' }}>
-          <h2 className="pricing-h2">{c.t.pricing_rates_title}</h2>
+        <section style={{ maxWidth: 1120, margin: '0 auto', padding: '64px 24px' }}>
+          <h2 className="pricing-h2">{t.pricing_rates_title}</h2>
           <div className="rate-table">
             <div className="rate-head">
               <div>Car type</div><div>Model</div><div>Seats</div><div>Rate/km</div><div />
@@ -37,7 +32,7 @@ export default async function Pricing() {
             ))}
           </div>
 
-          <h2 className="pricing-h2 later">{c.t.pricing_fares_title}</h2>
+          <h2 className="pricing-h2 later">{t.pricing_fares_title}</h2>
           <div className="cards-3" style={{ gap: 20 }}>
             {c.routes.map((r) => (
               <div key={r.id} className="fare-card">
@@ -51,6 +46,8 @@ export default async function Pricing() {
             ))}
           </div>
         </section>
+
+        <OfferBand c={c} />
       </div>
     </Shell>
   );

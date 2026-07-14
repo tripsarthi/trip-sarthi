@@ -60,33 +60,34 @@ const NEW_ROW = {
 
 // Grouped, human-labelled view of every text block on the site.
 const TEXT_GROUPS = [
-  { name: 'Announcement bar & navbar', keys: [
-    ['ann_1', 'Announcement — item 1'], ['ann_2', 'Announcement — item 2'], ['nav_cta', 'Navbar button label'],
+  { name: 'Home — Hero banner', keys: [
+    ['home_h1', 'Headline', 'textarea'], ['home_sub', 'Subtitle', 'textarea'],
+    ['home_cta', 'Orange button label'], ['quoteform_title', 'Booking form — title'],
   ]},
-  { name: 'Home — Hero', keys: [
-    ['home_badge', 'Badge'], ['home_h1', 'Headline (line breaks respected)', 'textarea'],
-    ['home_h1_accent', 'Headline highlighted word'], ['home_sub', 'Subtitle', 'textarea'],
-    ['home_cta_wa', 'WhatsApp button'], ['home_float_t', 'Floating card — title'], ['home_float_s', 'Floating card — subtitle'],
-    ['home_stat1_v', 'Stat 1 — value'], ['home_stat1_l', 'Stat 1 — label'],
-    ['home_stat2_v', 'Stat 2 — value'], ['home_stat2_l', 'Stat 2 — label'],
-    ['home_stat3_v', 'Stat 3 — value'], ['home_stat3_l', 'Stat 3 — label'],
+  { name: 'Home — Intro section', keys: [
+    ['intro_h2', 'Heading'], ['intro_p1', 'Paragraph 1', 'textarea'], ['intro_p2', 'Paragraph 2', 'textarea'],
   ]},
-  { name: 'Home — Quote bar', keys: [
-    ['quote_pickup', 'Pickup value'], ['quote_drop', 'Drop placeholder'], ['quote_trip', 'Trip type value'],
-    ['quote_cta', 'Button label'], ['quote_note', 'Note below bar', 'textarea'],
+  { name: 'Offer band (orange strip)', keys: [
+    ['offer_title', 'Title'], ['offer_cta', 'Button label'],
   ]},
   { name: 'Home — Section headings', keys: [
-    ['services_kicker', 'Services — kicker'], ['services_title', 'Services — title'],
-    ['fleet_kicker', 'Fleet — kicker'], ['fleet_title', 'Fleet — title'], ['fleet_link', 'Fleet — link label'],
-    ['routes_kicker', 'Routes — kicker'], ['routes_title', 'Routes — title'],
-    ['how_kicker', 'How it works — kicker'], ['how_title', 'How it works — title'],
-    ['reviews_kicker', 'Reviews — kicker'], ['reviews_title', 'Reviews — title'],
+    ['services_kicker', 'Services — small heading'], ['services_title', 'Services — title'],
+    ['cars_kicker', 'Cars — small heading'], ['cars_title', 'Cars — title'],
+    ['reviews_kicker', 'Reviews — small heading'], ['reviews_title', 'Reviews — title'],
+    ['places_title', 'Popular places — column heading'], ['estimate_title', 'Estimate band — title'],
   ]},
-  { name: 'Home — Offer banner', keys: [
-    ['offer_kicker', 'Kicker'], ['offer_title', 'Title'], ['offer_sub', 'Subtitle', 'textarea'], ['offer_cta', 'Button label'],
+  { name: 'Home — How to book', keys: [
+    ['how_title', 'Heading'], ['how_intro', 'Intro paragraph', 'textarea'],
+  ]},
+  { name: 'Home — Why us', keys: [
+    ['why_title', 'Heading'], ['why_intro', 'Intro paragraph', 'textarea'],
+  ]},
+  { name: 'Car cards', keys: [
+    ['car_line1', 'Line 1 (e.g. Limit: 250 KM / Day)'], ['car_line2', 'Line 2 (e.g. Driver: ₹400 / Day)'],
+    ['car_note', 'Bottom note'],
   ]},
   { name: 'About page', keys: [
-    ['about_kicker', 'Kicker'], ['about_h1', 'Headline', 'textarea'], ['about_h2', 'Story — heading'],
+    ['about_h2', 'Story — heading'],
     ['about_p1', 'Story — paragraph 1', 'textarea'], ['about_p2', 'Story — paragraph 2', 'textarea'],
     ['about_stat1_v', 'Stat 1 — value'], ['about_stat1_l', 'Stat 1 — label'],
     ['about_stat2_v', 'Stat 2 — value'], ['about_stat2_l', 'Stat 2 — label'],
@@ -94,18 +95,18 @@ const TEXT_GROUPS = [
     ['about_stat4_v', 'Stat 4 — value'], ['about_stat4_l', 'Stat 4 — label'],
     ['values_title', 'Values section — title'],
   ]},
-  { name: 'Fleet page', keys: [
-    ['fleetpage_kicker', 'Kicker'], ['fleetpage_h1', 'Headline'], ['fleetpage_sub', 'Subtitle', 'textarea'],
+  { name: 'Car page', keys: [
+    ['fleetpage_h1', 'Banner title'], ['fleetpage_sub', 'Banner subtitle', 'textarea'],
   ]},
-  { name: 'Pricing page', keys: [
-    ['pricing_kicker', 'Kicker'], ['pricing_h1', 'Headline'], ['pricing_sub', 'Subtitle', 'textarea'],
+  { name: 'Price page', keys: [
+    ['pricing_h1', 'Banner title'], ['pricing_sub', 'Banner subtitle', 'textarea'],
     ['pricing_rates_title', 'Rates table — heading'], ['pricing_fares_title', 'Fares grid — heading'],
   ]},
   { name: 'Gallery page', keys: [
-    ['gallerypage_kicker', 'Kicker'], ['gallerypage_h1', 'Headline'], ['gallerypage_sub', 'Subtitle', 'textarea'],
+    ['gallerypage_h1', 'Banner title'], ['gallerypage_sub', 'Banner subtitle', 'textarea'],
   ]},
   { name: 'Contact page', keys: [
-    ['contact_kicker', 'Kicker'], ['contact_h1', 'Headline'], ['contact_sub', 'Subtitle', 'textarea'],
+    ['contact_h1', 'Banner title'], ['contact_sub', 'Banner subtitle', 'textarea'],
     ['form_title', 'Form — title'], ['form_sub', 'Form — subtitle', 'textarea'],
   ]},
   { name: 'Footer', keys: [

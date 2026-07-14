@@ -1,5 +1,5 @@
 import { getContent } from '@/lib/db';
-import { Shell } from '@/components/SiteChrome';
+import { Shell, PageBanner, OfferBand } from '@/components/SiteChrome';
 import Img from '@/components/Img';
 
 export const revalidate = 3600;
@@ -10,18 +10,13 @@ export const metadata = {
 
 export default async function Gallery() {
   const c = await getContent();
+  const t = c.t;
   return (
     <Shell c={c} active="/gallery">
       <div className="fade">
-        <section className="page-hero">
-          <div className="wrap page-hero-inner">
-            <div className="kicker">{c.t.gallerypage_kicker}</div>
-            <h1>{c.t.gallerypage_h1}</h1>
-            <p>{c.t.gallerypage_sub}</p>
-          </div>
-        </section>
+        <PageBanner title={t.gallerypage_h1} sub={t.gallerypage_sub} />
 
-        <section className="wrap" style={{ paddingTop: 64, paddingBottom: 64 }}>
+        <section className="wrap" style={{ paddingTop: 56, paddingBottom: 56 }}>
           <div className="gallery-grid">
             {c.gallery.map((g) => (
               <div key={g.id} className={`gallery-item ${g.span || ''}`}>
@@ -32,6 +27,8 @@ export default async function Gallery() {
             ))}
           </div>
         </section>
+
+        <OfferBand c={c} />
       </div>
     </Shell>
   );

@@ -42,16 +42,18 @@ export function Navbar({ c, active }) {
             <Link key={href} href={href} className={active === href ? 'active' : ''}
               aria-current={active === href ? 'page' : undefined}>{label}</Link>
           ))}
+          <a href={c.wa} target="_blank" rel="noopener" className="btn nav-cta">Book Now</a>
         </nav>
       </div>
     </header>
   );
 }
 
-export function PageBanner({ title, sub }) {
+export function PageBanner({ kicker, title, sub }) {
   return (
     <section className="banner">
       <div className="wrap banner-inner">
+        {kicker && <div className="kicker">{kicker}</div>}
         <h1>{title}</h1>
         {sub && <p>{sub}</p>}
       </div>
@@ -61,16 +63,18 @@ export function PageBanner({ title, sub }) {
 
 export function OfferBand({ c }) {
   return (
-    <section className="offer-band">
-      <div className="wrap offer-inner">
+    <section className="wrap offer-band">
+      <div className="offer-inner">
         <div>
           <h2>{c.t.offer_title}</h2>
-          <a href={c.wa} target="_blank" rel="noopener" className="btn black">{c.t.offer_cta}</a>
+          <a href={c.wa} target="_blank" rel="noopener" className="btn dark">{c.t.offer_cta}</a>
         </div>
-        <a href={c.wa} target="_blank" rel="noopener" className="wa-btn">
-          <WaIcon />
-          <span>Whatsapp<span className="sub">Chat with us now</span></span>
-        </a>
+        <div className="offer-right">
+          <a href={c.wa} target="_blank" rel="noopener" className="wa-btn">
+            <WaIcon />
+            <span>Whatsapp<span className="sub">Chat with us now</span></span>
+          </a>
+        </div>
       </div>
     </section>
   );

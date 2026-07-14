@@ -14,7 +14,7 @@ export default async function Contact() {
   return (
     <Shell c={c} active="/contact">
       <div className="fade">
-        <PageBanner title={t.contact_h1} sub={t.contact_sub} />
+        <PageBanner kicker="Get in touch" title={t.contact_h1} sub={t.contact_sub} />
 
         <section className="wrap contact-grid">
           <div className="contact-cards">

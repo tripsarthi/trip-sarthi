@@ -18,10 +18,11 @@ export default async function About() {
   return (
     <Shell c={c} active="/about">
       <div className="fade">
-        <PageBanner title="About Us" />
+        <PageBanner kicker="Who we are" title="About Us" />
 
         <section className="wrap about-grid">
           <div>
+            <div className="kick2">Our story</div>
             <h2 className="h-orange">{t.about_h2}</h2>
             <p className="p-body">{t.about_p1}</p>
             <p className="p-body">{t.about_p2}</p>
@@ -47,14 +48,23 @@ export default async function About() {
           </div>
         </section>
 
-        <section className="longform">
-          <div className="longform-inner">
-            <h2>{t.values_title}</h2>
-            <ul>
+        <section className="cream">
+          <div className="wrap section2">
+            <div className="center-head">
+              <div className="kick2">Our promise</div>
+              <h2 className="title2">{t.values_title}</h2>
+            </div>
+            <div className="why-grid">
               {c.values.map((v) => (
-                <li key={v.id}><b>{v.title}:</b> {v.description}</li>
+                <div key={v.id} className="why-card">
+                  <span className="check">✓</span>
+                  <div>
+                    <div className="t">{v.title}</div>
+                    <div className="d">{v.description}</div>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </section>
 

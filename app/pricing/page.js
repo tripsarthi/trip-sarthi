@@ -13,7 +13,7 @@ export default async function Pricing() {
   return (
     <Shell c={c} active="/pricing">
       <div className="fade">
-        <PageBanner title={t.pricing_h1} sub={t.pricing_sub} />
+        <PageBanner kicker="Transparent fares" title={t.pricing_h1} sub={t.pricing_sub} />
 
         <section style={{ maxWidth: 1120, margin: '0 auto', padding: '64px 24px' }}>
           <h2 className="pricing-h2">{t.pricing_rates_title}</h2>

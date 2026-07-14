@@ -27,28 +27,36 @@ export default async function Home() {
     url: process.env.NEXT_PUBLIC_SITE_URL || undefined,
   };
 
-  // "Delhi → Agra" → "Delhi to Agra Taxi"
-  const placeLink = (r) => `${r.title.replace('→', 'to')} Taxi`;
-  const placeCols = [c.routes.slice(0, 2), c.routes.slice(2, 4), c.routes.slice(4, 6)];
+  // Highlight the last two words of the hero headline in gold
+  const h1Words = t.home_h1.split(' ');
+  const h1Main = h1Words.slice(0, -2).join(' ');
+  const h1Accent = h1Words.slice(-2).join(' ');
 
   return (
     <Shell c={c} active="/">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="fade">
 
-        {/* Hero with booking form */}
-        <section className="hero2">
-          <div className="hero2-bg"><Img src={c.settings.hero_image} alt="" priority sizes="100vw" /></div>
-          <div className="hero2-shade" />
-          <div className="wrap hero2-grid">
+        {/* Hero — dark with gold, booking card */}
+        <section className="hero3">
+          <div className="hero3-bg"><Img src={c.settings.hero_image} alt="" priority sizes="100vw" /></div>
+          <div className="hero3-fade" />
+          <div className="wrap hero3-grid">
             <div>
-              <h1>{t.home_h1}</h1>
+              <div className="kicker">24×7 Cab &amp; Taxi Service</div>
+              <h1>{h1Main} <span>{h1Accent}</span></h1>
               <p className="sub">{t.home_sub}</p>
-              <div className="hero2-phone">
+              <a href={c.tel} className="phone-pill">
                 <span className="ic"><CallIcon /></span>{c.phone}
+              </a>
+              <div className="hero3-ctas">
+                <a href={c.wa} target="_blank" rel="noopener" className="btn">{t.home_cta}</a>
+                <a href={c.tel} className="btn ghost">Call Us</a>
               </div>
-              <div className="hero2-ctas">
-                <a href={c.tel} className="btn">{t.home_cta}</a>
+              <div className="stat-chips">
+                <span className="chip"><b>4.9★</b> Avg. rating</span>
+                <span className="chip"><b>12k+</b> Trips done</span>
+                <span className="chip"><b>150+</b> Cities</span>
               </div>
             </div>
             <QuoteForm title={t.quoteform_title} />
@@ -59,6 +67,7 @@ export default async function Home() {
         <section className="wrap section2">
           <div className="intro-grid">
             <div>
+              <div className="kick2">About the service</div>
               <h2 className="h-orange">{t.intro_h2}</h2>
               <p className="p-body">{t.intro_p1}</p>
               <p className="p-body">{t.intro_p2}</p>
@@ -78,89 +87,106 @@ export default async function Home() {
         <OfferBand c={c} />
 
         {/* What we offer */}
-        <section className="wrap section2">
-          <div className="center-head">
-            <div className="kick2">{t.services_kicker}</div>
-            <h2 className="title2">{t.services_title}</h2>
-          </div>
-          <div className="svc-grid">
-            {c.services.map((s) => (
-              <div key={s.id} className="svc">
-                <div className="ic">{s.num}</div>
-                <div className="t">{s.title}</div>
-                <div className="d">{s.description}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* How to book (long-form) */}
-        <section className="longform">
-          <div className="longform-inner">
-            <h2>{t.how_title}</h2>
-            <p>{t.how_intro}</p>
-            <ol>
-              {c.steps.map((st) => (
-                <li key={st.id}><b>{st.title}:</b> {st.description}</li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* Why us (long-form) */}
-        <section className="longform white">
-          <div className="longform-inner">
-            <h2>{t.why_title}</h2>
-            <p>{t.why_intro}</p>
-            <ul>
-              {c.values.map((v) => (
-                <li key={v.id}><b>{v.title}:</b> {v.description}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <OfferBand c={c} />
-
-        {/* Car classes and rates */}
-        <section className="wrap section2">
-          <div className="center-head">
-            <div className="kick2">{t.cars_kicker}</div>
-            <h2 className="title2">{t.cars_title}</h2>
-          </div>
-          <div className="car-grid">
-            {c.cars.map((car) => <CarCard key={car.id} car={car} c={c} />)}
-          </div>
-        </section>
-
-        {/* Popular places */}
-        <section className="longform">
-          <div className="wrap" style={{ paddingTop: 56, paddingBottom: 56 }}>
-            <div className="places-grid">
-              {placeCols.map((col, i) => (
-                <div key={i} className="places">
-                  <h3>{t.places_title}</h3>
-                  {col.map((r) => (
-                    <a key={r.id} href={c.wa} target="_blank" rel="noopener">
-                      <span className="pin">➤</span>{placeLink(r)}
-                    </a>
-                  ))}
+        <section className="cream">
+          <div className="wrap section2">
+            <div className="center-head">
+              <div className="kick2">{t.services_kicker}</div>
+              <h2 className="title2">{t.services_title}</h2>
+            </div>
+            <div className="svc-grid">
+              {c.services.map((s) => (
+                <div key={s.id} className="svc">
+                  <div className="ic">{s.num}</div>
+                  <div className="t">{s.title}</div>
+                  <div className="d">{s.description}</div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Get estimate band */}
-        <section className="estimate">
-          <div className="wrap estimate-inner">
-            <div>
-              <h2>{t.estimate_title}</h2>
-              <div className="estimate-car">
-                <Img src={c.cars[1]?.image_url} alt="Cab" sizes="300px" />
-              </div>
+        {/* How to book — dark band with numbered cards */}
+        <section className="dark-band">
+          <div className="wrap section2">
+            <div className="center-head" style={{ marginBottom: 18 }}>
+              <div className="kick2" style={{ color: 'var(--brand)' }}>Simple &amp; fast</div>
+              <h2 className="title2 on-dark">{t.how_title}</h2>
             </div>
-            <EstimateForm carNames={c.cars.map((car) => car.name)} />
+            <p className="lead">{t.how_intro}</p>
+            <div className="step-grid">
+              {c.steps.map((st) => (
+                <div key={st.id} className="step-card">
+                  <div className="num">{st.num}</div>
+                  <div className="t">{st.title}</div>
+                  <div className="d">{st.description}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Why us — check cards */}
+        <section className="wrap section2">
+          <div className="center-head" style={{ marginBottom: 18 }}>
+            <div className="kick2">Our promise</div>
+            <h2 className="title2">{t.why_title}</h2>
+          </div>
+          <p className="why-lead">{t.why_intro}</p>
+          <div className="why-grid">
+            {c.values.map((v) => (
+              <div key={v.id} className="why-card">
+                <span className="check">✓</span>
+                <div>
+                  <div className="t">{v.title}</div>
+                  <div className="d">{v.description}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Car classes and rates */}
+        <section className="cream">
+          <div className="wrap section2">
+            <div className="center-head">
+              <div className="kick2">{t.cars_kicker}</div>
+              <h2 className="title2">{t.cars_title}</h2>
+            </div>
+            <div className="car-grid">
+              {c.cars.map((car) => <CarCard key={car.id} car={car} c={c} />)}
+            </div>
+          </div>
+        </section>
+
+        {/* Popular places — pill chips */}
+        <section className="wrap section2">
+          <div className="center-head">
+            <div className="kick2">Outstation favourites</div>
+            <h2 className="title2">{t.places_title} Delhi</h2>
+          </div>
+          <div className="place-pills">
+            {c.routes.map((r) => (
+              <a key={r.id} href={c.wa} target="_blank" rel="noopener" className="place-pill">
+                {r.title.replace('→', 'to')}
+                <span className="price">{r.price}</span>
+                <span className="arrow">→</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* Get estimate — dark rounded card */}
+        <section className="cream">
+          <div className="wrap" style={{ paddingTop: 64, paddingBottom: 64 }}>
+            <div className="est-card">
+              <div>
+                <h2>{t.estimate_title.split(' ').slice(0, -1).join(' ')} <span>{t.estimate_title.split(' ').slice(-1)}</span></h2>
+                <div className="estimate-car">
+                  <Img src={c.cars[1]?.image_url} alt="Cab" sizes="300px" />
+                </div>
+              </div>
+              <EstimateForm carNames={c.cars.map((car) => car.name)} />
+            </div>
           </div>
         </section>
 
@@ -183,6 +209,8 @@ export default async function Home() {
             ))}
           </div>
         </section>
+
+        <OfferBand c={c} />
 
       </div>
     </Shell>

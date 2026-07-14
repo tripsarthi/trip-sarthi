@@ -14,7 +14,7 @@ export default async function Gallery() {
   return (
     <Shell c={c} active="/gallery">
       <div className="fade">
-        <PageBanner title={t.gallerypage_h1} sub={t.gallerypage_sub} />
+        <PageBanner kicker="From the road" title={t.gallerypage_h1} sub={t.gallerypage_sub} />
 
         <section className="wrap" style={{ paddingTop: 56, paddingBottom: 56 }}>
           <div className="gallery-grid">

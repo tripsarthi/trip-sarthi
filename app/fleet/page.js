@@ -14,7 +14,7 @@ export default async function Fleet() {
   return (
     <Shell c={c} active="/fleet">
       <div className="fade">
-        <PageBanner title={t.fleetpage_h1} sub={t.fleetpage_sub} />
+        <PageBanner kicker="Our fleet" title={t.fleetpage_h1} sub={t.fleetpage_sub} />
 
         <section className="wrap section2">
           <div className="center-head">

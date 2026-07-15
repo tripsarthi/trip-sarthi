@@ -12,7 +12,7 @@ const SECTIONS = [
   { key: 'routes', label: 'Routes', icon: '➤' },
   { key: 'sections', label: 'Page Sections', icon: '▤' },
   { key: 'testimonials', label: 'Testimonials', icon: '★' },
-  { key: 'gallery', label: 'Gallery', icon: '▣' },
+  { key: 'gallery', label: 'Himachal Photos', icon: '▲' },
   { key: 'settings', label: 'Site Settings', icon: '⚙' },
 ];
 
@@ -103,8 +103,11 @@ const TEXT_GROUPS = [
     ['pricing_h1', 'Banner title'], ['pricing_sub', 'Banner subtitle', 'textarea'],
     ['pricing_rates_title', 'Rates table — heading'], ['pricing_fares_title', 'Fares grid — heading'],
   ]},
-  { name: 'Gallery page', keys: [
-    ['gallerypage_h1', 'Banner title'], ['gallerypage_sub', 'Banner subtitle', 'textarea'],
+  { name: 'Himachal page', keys: [
+    ['himachal_h1', 'Hero title'], ['himachal_sub', 'Hero subtitle', 'textarea'],
+    ['himachal_intro_h2', 'Intro — heading'],
+    ['himachal_p1', 'Intro — paragraph 1', 'textarea'], ['himachal_p2', 'Intro — paragraph 2', 'textarea'],
+    ['himachal_dest_title', 'Destinations — heading'], ['himachal_gallery_title', 'Photo section — heading'],
   ]},
   { name: 'Contact page', keys: [
     ['contact_h1', 'Banner title'], ['contact_sub', 'Banner subtitle', 'textarea'],
@@ -370,7 +373,7 @@ function TableEditor({ table, api, compact }) {
   }
 
   const titles = {
-    cars: 'Fleet & Rates', routes: 'Routes', testimonials: 'Testimonials', gallery: 'Gallery',
+    cars: 'Fleet & Rates', routes: 'Routes', testimonials: 'Testimonials', gallery: 'Himachal Photos',
     services: 'Services (home)', features: 'Trust points (home)', steps: 'How it works (home)', brand_values: 'Values (about)',
   };
 

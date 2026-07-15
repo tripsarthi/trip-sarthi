@@ -10,6 +10,9 @@ const nextConfig = {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
     minimumCacheTTL: 86400,
   },
+  async redirects() {
+    return [{ source: '/gallery', destination: '/himachal', permanent: true }];
+  },
   async headers() {
     return [
       {

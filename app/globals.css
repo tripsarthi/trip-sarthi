@@ -300,6 +300,30 @@ input, textarea, select { font-family: inherit; }
 .fare-card .book { font: 700 13px var(--sora); color: var(--ink); border-bottom: 2px solid var(--brand); padding-bottom: 2px; }
 .cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 
+/* ---------- Himachal destination page ---------- */
+.dest-hero { position: relative; background: var(--ink); overflow: hidden; display: flex; align-items: flex-end; min-height: 480px; }
+.dest-hero-bg { position: absolute; inset: 0; }
+.dest-hero-bg img { object-fit: cover; }
+.dest-hero-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,17,10,.25) 0%, rgba(20,17,10,.45) 55%, rgba(20,17,10,.92) 100%); }
+.dest-hero-content { position: relative; width: 100%; padding-top: 110px; padding-bottom: 56px; }
+.dest-hero-content h1 { font: 800 clamp(40px, 6vw, 66px)/1.05 var(--sora); letter-spacing: -.025em; color: #fff; margin: 0 0 14px; }
+.dest-hero-content p { font: 500 16.5px/1.7 var(--manrope); color: #e6dfd2; max-width: 560px; margin: 0 0 26px; }
+.dest-hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+.dest-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.dest-card {
+  position: relative; display: block; border-radius: 20px; overflow: hidden; height: 300px; color: #fff;
+  box-shadow: 0 14px 34px rgba(20,17,10,.14); transition: transform .18s, box-shadow .18s;
+}
+.dest-card:hover { transform: translateY(-6px); box-shadow: 0 26px 54px rgba(20,17,10,.22); color: #fff; }
+.dest-card img { object-fit: cover; }
+.dest-card .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,17,10,0) 34%, rgba(20,17,10,.86) 100%); pointer-events: none; }
+.dest-card .info { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 24px; }
+.dest-card .n { font: 700 23px var(--sora); letter-spacing: -.01em; }
+.dest-card .m { font: 600 13px var(--manrope); color: #e6dfd2; margin: 4px 0 12px; }
+.dest-card .price { display: inline-block; background: var(--brand); color: var(--ink); font: 800 13px var(--sora); padding: 7px 14px; border-radius: 999px; }
+@media (max-width: 1000px) { .dest-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .dest-grid { grid-template-columns: 1fr; } .dest-hero { min-height: 420px; } }
+
 /* ---------- Gallery ---------- */
 .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 210px; gap: 16px; }
 .gallery-item { border-radius: 18px; overflow: hidden; position: relative; box-shadow: 0 10px 26px rgba(20,17,10,.08); }

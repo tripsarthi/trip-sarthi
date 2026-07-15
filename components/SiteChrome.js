@@ -6,7 +6,7 @@ const NAV = [
   ['About Us', '/about'],
   ['Car', '/fleet'],
   ['Price', '/pricing'],
-  ['Gallery', '/gallery'],
+  ['Himachal', '/himachal'],
   ['Contact Us', '/contact'],
 ];
 

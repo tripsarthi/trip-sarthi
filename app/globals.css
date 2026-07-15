@@ -1,9 +1,13 @@
 :root {
-  /* Brand — Trip Sarthi charcoal & gold */
+  /* Brand — Trip Sarthi charcoal & gold.
+     --brand/--brand-deep/--btn-radius can be overridden from the admin
+     Appearance tab (injected as an inline style by <Shell>). */
   --brand: #F5B301;
   --brand-deep: #C98A00;
-  --brand-soft: #fff5da;
-  --brand-line: #f4e3ad;
+  --btn-radius: 999px;
+  --brand-soft: color-mix(in srgb, var(--brand) 15%, #ffffff);
+  --brand-line: color-mix(in srgb, var(--brand) 32%, #ffffff);
+  --brand-glow: color-mix(in srgb, var(--brand) 38%, transparent);
   --ink: #14110a;
   --ink-2: #1b1811;
   --ink-line: #2b271d;
@@ -58,9 +62,9 @@ input, textarea, select { font-family: inherit; }
 /* ---------- Buttons (pill style) ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  background: var(--brand); color: var(--ink); border: none; border-radius: 999px;
+  background: var(--brand); color: var(--ink); border: none; border-radius: var(--btn-radius);
   font: 700 14.5px var(--sora); padding: 14px 30px;
-  box-shadow: 0 8px 22px rgba(245,179,1,.38); transition: transform .15s;
+  box-shadow: 0 8px 22px var(--brand-glow); transition: transform .15s;
 }
 .btn:hover { transform: translateY(-2px); color: var(--ink); }
 .btn.dark { background: var(--ink); color: #fff; box-shadow: 0 8px 22px rgba(20,17,10,.3); }
@@ -96,6 +100,8 @@ input, textarea, select { font-family: inherit; }
 .hero3-bg img { object-fit: cover; }
 .hero3-fade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,17,10,.96) 0%, rgba(20,17,10,.75) 50%, rgba(20,17,10,.45) 100%); }
 .hero3-grid { position: relative; display: grid; grid-template-columns: 1.08fr .92fr; gap: 52px; align-items: center; padding-top: 68px; padding-bottom: 68px; }
+.hero3-grid.form-left { grid-template-columns: .92fr 1.08fr; }
+.hero3-grid.form-left .qcard { order: -1; justify-self: start; }
 .kicker { font: 700 13px var(--manrope); letter-spacing: .18em; text-transform: uppercase; color: var(--brand); margin-bottom: 14px; }
 .hero3 h1 { font: 800 clamp(32px, 4.2vw, 50px)/1.12 var(--sora); letter-spacing: -.02em; color: #fff; margin: 0 0 18px; }
 .hero3 h1 span { color: var(--brand); }
@@ -151,9 +157,9 @@ input, textarea, select { font-family: inherit; }
 /* ---------- Offer banner (rounded gold card) ---------- */
 .offer-band { padding: 34px 0; }
 .offer-inner {
-  background: linear-gradient(120deg, var(--brand) 0%, #ffcf4d 100%); border-radius: 26px;
+  background: linear-gradient(120deg, var(--brand) 0%, color-mix(in srgb, var(--brand) 62%, #ffffff) 100%); border-radius: 26px;
   padding: 44px 46px; display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap;
-  box-shadow: 0 24px 55px rgba(245,179,1,.35);
+  box-shadow: 0 24px 55px var(--brand-glow);
 }
 .offer-inner h2 { font: 800 clamp(24px, 3vw, 34px)/1.15 var(--sora); letter-spacing: -.02em; color: var(--ink); margin: 0 0 18px; }
 .offer-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -202,7 +208,7 @@ input, textarea, select { font-family: inherit; }
 .car3-img { height: 185px; position: relative; background: #f2efe7; }
 .car3-img img { object-fit: cover; }
 .car3-tag { position: absolute; top: 13px; left: 13px; background: var(--ink); color: var(--brand); font: 700 11px var(--manrope); letter-spacing: .05em; padding: 6px 12px; border-radius: 999px; z-index: 1; }
-.car3-price { position: absolute; bottom: -15px; right: 18px; background: var(--brand); color: var(--ink); font: 800 15px var(--sora); padding: 8px 16px; border-radius: 999px; box-shadow: 0 8px 18px rgba(245,179,1,.4); z-index: 1; }
+.car3-price { position: absolute; bottom: -15px; right: 18px; background: var(--brand); color: var(--ink); font: 800 15px var(--sora); padding: 8px 16px; border-radius: 999px; box-shadow: 0 8px 18px var(--brand-glow); z-index: 1; }
 .car3-body { padding: 26px 22px 0; flex: 1; }
 .car3-body h3 { font: 700 21px var(--sora); color: var(--ink); margin: 0 0 2px; }
 .car3-body .model { font: 600 13px var(--manrope); color: var(--muted-2); margin-bottom: 14px; }
@@ -210,8 +216,8 @@ input, textarea, select { font-family: inherit; }
 .car3-body .row::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); flex: none; }
 .car3-body .note { font: 600 12.5px var(--manrope); color: var(--muted-2); margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line-3); }
 .car3-cta { display: flex; gap: 10px; padding: 18px 22px 22px; }
-.car3-cta a { flex: 1; text-align: center; padding: 12px; border-radius: 999px; font: 700 13.5px var(--sora); }
-.car3-cta .book { background: var(--brand); color: var(--ink); box-shadow: 0 6px 16px rgba(245,179,1,.35); }
+.car3-cta a { flex: 1; text-align: center; padding: 12px; border-radius: var(--btn-radius); font: 700 13.5px var(--sora); }
+.car3-cta .book { background: var(--brand); color: var(--ink); box-shadow: 0 6px 16px var(--brand-glow); }
 .car3-cta .call { border: 1.5px solid #ddd6ca; color: var(--ink); }
 .car3-cta .call:hover { border-color: var(--ink); }
 
@@ -285,7 +291,7 @@ input, textarea, select { font-family: inherit; }
 .rate-row .c-model, .rate-row .c-seats { padding: 16px 20px; font: 600 14px var(--manrope); color: var(--text); }
 .rate-row .c-rate { padding: 16px 20px; font: 800 15px var(--sora); color: var(--brand-deep); }
 .rate-row .c-cta { padding: 11px 20px; }
-.rate-row .c-cta a { display: inline-block; padding: 9px 20px; border-radius: 999px; background: var(--brand); color: var(--ink); font: 700 13px var(--sora); }
+.rate-row .c-cta a { display: inline-block; padding: 9px 20px; border-radius: var(--btn-radius); background: var(--brand); color: var(--ink); font: 700 13px var(--sora); }
 .fare-card { border: 1px solid var(--line); border-radius: 18px; padding: 24px 26px; background: #fff; }
 .fare-card .t { font: 700 19px var(--sora); color: var(--ink); }
 .fare-card .m { font: 600 13px var(--manrope); color: var(--muted-2); margin: 4px 0 16px; }
@@ -360,6 +366,7 @@ a.contact-card:hover { box-shadow: 0 14px 30px rgba(20,17,10,.1); transform: tra
 
 /* ---------- Floating contact buttons ---------- */
 .float-contact { position: fixed; right: 18px; bottom: 18px; z-index: 950; display: flex; flex-direction: column; gap: 10px; }
+.float-contact.left { right: auto; left: 18px; }
 .float-contact a {
   width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,.3); transition: transform .15s;
@@ -423,7 +430,11 @@ a.contact-card:hover { box-shadow: 0 14px 30px rgba(20,17,10,.1); transform: tra
 
 /* ---------- Admin ---------- */
 .admin-shell { min-height: 100vh; display: flex; background: #f6f4ee; }
-.admin-side { width: 230px; flex: none; background: var(--ink); color: #cfc8bc; display: flex; flex-direction: column; padding: 22px 14px; gap: 4px; }
+.admin-side {
+  width: 230px; flex: none; background: var(--ink); color: #cfc8bc;
+  display: flex; flex-direction: column; padding: 22px 14px; gap: 4px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
 .admin-side .brand { margin: 0 8px 22px; }
 .admin-side .brand img { height: 40px; width: 40px; border-radius: 10px; }
 .admin-side .brand-name { font-size: 17px; }
@@ -474,8 +485,11 @@ a.contact-card:hover { box-shadow: 0 14px 30px rgba(20,17,10,.1); transform: tra
 .login-card { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 38px; width: 100%; max-width: 400px; box-shadow: 0 18px 44px rgba(20,17,10,.08); }
 @media (max-width: 800px) {
   .admin-shell { flex-direction: column; }
-  .admin-side { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .admin-side { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; position: static; height: auto; overflow: visible; }
   .admin-side .brand { margin: 0 12px 0 0; }
   .admin-main { padding: 20px 16px; }
   .stat-tiles { grid-template-columns: repeat(2, 1fr); }
 }
+.swatch-row { display: flex; align-items: center; gap: 12px; }
+.swatch-row input[type="color"] { width: 52px; height: 38px; border: 1px solid var(--line-3); border-radius: 8px; padding: 2px; background: #fff; cursor: pointer; }
+.theme-preview { border: 1px dashed var(--line-3); border-radius: 14px; padding: 22px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; background: var(--cream); }

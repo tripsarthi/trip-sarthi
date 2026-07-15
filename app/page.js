@@ -41,7 +41,7 @@ export default async function Home() {
         <section className="hero3">
           <div className="hero3-bg"><Img src={c.settings.hero_image} alt="" priority sizes="100vw" /></div>
           <div className="hero3-fade" />
-          <div className="wrap hero3-grid">
+          <div className={`wrap hero3-grid ${t.theme_hero_form === 'left' ? 'form-left' : ''}`}>
             <div>
               <div className="kicker">24×7 Cab &amp; Taxi Service</div>
               <h1>{h1Main} <span>{h1Accent}</span></h1>

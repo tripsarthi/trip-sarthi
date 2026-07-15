@@ -6,6 +6,7 @@ import { DEFAULT_CONTENT } from '@/lib/defaults';
 const SECTIONS = [
   { key: 'overview', label: 'Overview', icon: '◈' },
   { key: 'enquiries', label: 'Enquiries', icon: '✉' },
+  { key: 'appearance', label: 'Appearance', icon: '◐' },
   { key: 'text', label: 'Website Text', icon: '✎' },
   { key: 'cars', label: 'Fleet & Rates', icon: '⛟' },
   { key: 'routes', label: 'Routes', icon: '➤' },
@@ -223,6 +224,7 @@ function Dashboard({ sb, session, tab, setTab }) {
       <main className="admin-main">
         {tab === 'overview' && <Overview counts={counts} setTab={setTab} />}
         {tab === 'enquiries' && <Enquiries api={api} />}
+        {tab === 'appearance' && <AppearanceEditor api={api} />}
         {tab === 'text' && <ContentEditor api={api} />}
         {['cars', 'routes', 'testimonials', 'gallery'].includes(tab) && <TableEditor key={tab} table={tab} api={api} />}
         {tab === 'sections' && (
@@ -535,6 +537,134 @@ function ContentEditor({ api }) {
           </div>
         </div>
       ))}
+    </>
+  );
+}
+
+const THEME_KEYS = ['theme_brand', 'theme_brand_deep', 'theme_btn_shape', 'theme_hero_form', 'theme_float_pos'];
+const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+
+function AppearanceEditor({ api }) {
+  const [vals, setVals] = useState(null);
+  const [err, setErr] = useState(null);
+  const [note, setNote] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    api({ action: 'list', table: 'content' })
+      .then(({ data }) => {
+        const merged = {};
+        for (const k of THEME_KEYS) merged[k] = DEFAULT_CONTENT[k];
+        for (const row of data) if (THEME_KEYS.includes(row.key)) merged[row.key] = row.value;
+        setVals(merged);
+      })
+      .catch((e) => setErr(e.message));
+  }, [api]);
+
+  if (err) return <SchemaHint title="Appearance" err={err} />;
+  if (!vals) return <p className="admin-note">Loading…</p>;
+
+  const set = (k) => (e) => setVals({ ...vals, [k]: e.target.value });
+
+  async function save() {
+    if (!HEX_RE.test(vals.theme_brand) || !HEX_RE.test(vals.theme_brand_deep)) {
+      setNote({ ok: false, text: 'Colors must be valid hex values like #F5B301.' });
+      return;
+    }
+    setBusy(true); setNote(null);
+    try {
+      const rows = THEME_KEYS.map((key) => ({ key, value: vals[key] }));
+      await api({ action: 'upsert', table: 'content', rows });
+      setNote({ ok: true, text: 'Saved. The website now uses the new look.' });
+    } catch (e) { setNote({ ok: false, text: e.message }); }
+    setBusy(false);
+  }
+
+  function reset() {
+    const d = {};
+    for (const k of THEME_KEYS) d[k] = DEFAULT_CONTENT[k];
+    setVals(d);
+    setNote({ ok: true, text: 'Reset to Trip Sarthi defaults — hit Save to apply.' });
+  }
+
+  const radius = vals.theme_btn_shape === 'rounded' ? 12 : 999;
+
+  return (
+    <>
+      <h1 className="admin-title">Appearance</h1>
+      <p className="admin-sub">Change the website&apos;s button colors, shape and placements — no code needed.</p>
+
+      <div className="admin-toolbar">
+        <button className="admin-btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save & apply'}</button>
+        <button className="admin-btn ghost" onClick={reset} disabled={busy}>Reset to default</button>
+        {note && <span className={`admin-note ${note.ok ? 'ok' : 'err'}`}>{note.text}</span>}
+      </div>
+
+      <div className="admin-card" style={{ maxWidth: 640 }}>
+        <div style={{ font: '800 15px var(--sora)', color: 'var(--ink)', marginBottom: 14 }}>Colors</div>
+        <div className="form-grid">
+          <div className="form-field">
+            <label>Primary color (buttons, highlights, accents)</label>
+            <div className="swatch-row" style={{ marginTop: 7 }}>
+              <input type="color" value={HEX_RE.test(vals.theme_brand) ? vals.theme_brand : '#F5B301'}
+                onChange={set('theme_brand')} aria-label="Primary color picker" />
+              <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand} onChange={set('theme_brand')} />
+            </div>
+          </div>
+          <div className="form-field">
+            <label>Dark accent (links, prices, small headings)</label>
+            <div className="swatch-row" style={{ marginTop: 7 }}>
+              <input type="color" value={HEX_RE.test(vals.theme_brand_deep) ? vals.theme_brand_deep : '#C98A00'}
+                onChange={set('theme_brand_deep')} aria-label="Dark accent color picker" />
+              <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand_deep} onChange={set('theme_brand_deep')} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-card" style={{ maxWidth: 640 }}>
+        <div style={{ font: '800 15px var(--sora)', color: 'var(--ink)', marginBottom: 14 }}>Shape &amp; placement</div>
+        <div className="form-grid">
+          <div className="form-field">
+            <label>Button shape</label>
+            <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_btn_shape} onChange={set('theme_btn_shape')}>
+              <option value="pill">Pill (fully rounded)</option>
+              <option value="rounded">Rounded rectangle</option>
+            </select>
+          </div>
+          <div className="form-field">
+            <label>Home hero — booking form side</label>
+            <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_form} onChange={set('theme_hero_form')}>
+              <option value="right">Right (text left, form right)</option>
+              <option value="left">Left (form left, text right)</option>
+            </select>
+          </div>
+          <div className="form-field">
+            <label>Floating call / WhatsApp buttons</label>
+            <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_float_pos} onChange={set('theme_float_pos')}>
+              <option value="right">Bottom right</option>
+              <option value="left">Bottom left</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-card" style={{ maxWidth: 640 }}>
+        <div style={{ font: '800 15px var(--sora)', color: 'var(--ink)', marginBottom: 14 }}>Live preview</div>
+        <div className="theme-preview">
+          <span style={{
+            display: 'inline-block', padding: '13px 28px', borderRadius: radius,
+            background: vals.theme_brand, color: '#14110a', font: '700 14px var(--sora)',
+            boxShadow: `0 8px 22px ${vals.theme_brand}55`,
+          }}>Book Now</span>
+          <span style={{
+            display: 'inline-block', padding: '13px 28px', borderRadius: radius,
+            background: '#14110a', color: '#fff', font: '700 14px var(--sora)',
+          }}>Call Us</span>
+          <span style={{ font: '800 16px var(--sora)', color: vals.theme_brand_deep }}>₹13/KM</span>
+          <span style={{ font: '700 12px var(--manrope)', letterSpacing: '.14em', textTransform: 'uppercase', color: vals.theme_brand_deep }}>Section heading</span>
+        </div>
+      </div>
     </>
   );
 }

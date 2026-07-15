@@ -82,7 +82,7 @@ export function OfferBand({ c }) {
 
 export function FloatingContact({ c }) {
   return (
-    <div className="float-contact">
+    <div className={`float-contact ${c.t.theme_float_pos === 'left' ? 'left' : ''}`}>
       <a href={c.tel} className="fc-call" aria-label={`Call ${c.phone}`}><CallIcon /></a>
       <a href={c.wa} target="_blank" rel="noopener" className="fc-wa" aria-label="Chat on WhatsApp"><WaIcon /></a>
     </div>
@@ -124,9 +124,21 @@ export function Footer({ c }) {
   );
 }
 
+// Admin-editable theme (Appearance tab) → CSS variable overrides.
+const HEX = /^#[0-9a-fA-F]{3,8}$/;
+function ThemeStyle({ t }) {
+  const brand = HEX.test(t.theme_brand || '') ? t.theme_brand : '#F5B301';
+  const deep = HEX.test(t.theme_brand_deep || '') ? t.theme_brand_deep : '#C98A00';
+  const radius = t.theme_btn_shape === 'rounded' ? '12px' : '999px';
+  return (
+    <style>{`:root{--brand:${brand};--brand-deep:${deep};--btn-radius:${radius};}`}</style>
+  );
+}
+
 export function Shell({ c, active, children }) {
   return (
     <div className="page-shell">
+      <ThemeStyle t={c.t} />
       <Navbar c={c} active={active} />
       <main>{children}</main>
       <Footer c={c} />

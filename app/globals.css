@@ -514,6 +514,15 @@ a.contact-card:hover { box-shadow: 0 14px 30px rgba(20,17,10,.1); transform: tra
   .admin-main { padding: 20px 16px; }
   .stat-tiles { grid-template-columns: repeat(2, 1fr); }
 }
+.img-cell { display: flex; gap: 10px; align-items: flex-start; }
+.img-thumb {
+  width: 62px; height: 50px; border-radius: 8px; object-fit: cover; flex: none;
+  border: 1px solid var(--line-3); background: var(--cream);
+  display: flex; align-items: center; justify-content: center; color: var(--mut-3); font: 700 14px var(--sora);
+}
+.img-actions { flex: 1; display: grid; gap: 6px; min-width: 0; }
+.img-upload { text-align: center; cursor: pointer; padding: 8px 12px; font-size: 12.5px; }
+.img-upload.busy { opacity: .6; }
 .swatch-row { display: flex; align-items: center; gap: 12px; }
 .swatch-row input[type="color"] { width: 52px; height: 38px; border: 1px solid var(--line-3); border-radius: 8px; padding: 2px; background: #fff; cursor: pointer; }
 .theme-preview { border: 1px dashed var(--line-3); border-radius: 14px; padding: 22px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; background: var(--cream); }

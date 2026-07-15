@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { serviceClient, anonClient } from '@/lib/db';
+import { serviceClient } from '@/lib/db';
+import { requireUser } from '@/lib/adminAuth';
 
 // Purge the ISR cache for every public page so admin edits go live instantly.
 function purgeSiteCache() {
@@ -20,15 +21,6 @@ const TABLES = {
   content: { order: 'key', pk: 'key' },
   enquiries: { order: 'created_at', desc: true },
 };
-
-async function requireUser(req) {
-  const auth = req.headers.get('authorization') || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-  if (!token) return null;
-  const { data, error } = await anonClient().auth.getUser(token);
-  if (error || !data?.user) return null;
-  return data.user;
-}
 
 export async function POST(req) {
   const user = await requireUser(req);

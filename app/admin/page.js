@@ -20,18 +20,18 @@ const COLUMNS = {
   cars: [
     ['name', 'Name'], ['model', 'Model'], ['seats', 'Seats', 'number'], ['bags', 'Bags'],
     ['rate', '₹/km', 'number'], ['tag', 'Tag'], ['description', 'Description', 'textarea'],
-    ['image_url', 'Image URL'], ['sort', 'Order', 'number'],
+    ['image_url', 'Image', 'image'], ['sort', 'Order', 'number'],
   ],
   routes: [
     ['title', 'Title'], ['meta', 'Distance / time'], ['price', 'Price label'],
-    ['image_url', 'Image URL'], ['sort', 'Order', 'number'],
+    ['image_url', 'Image', 'image'], ['sort', 'Order', 'number'],
   ],
   testimonials: [
     ['name', 'Name'], ['meta', 'City'], ['stars', 'Stars (1–5)', 'number'],
     ['quote', 'Quote', 'textarea'], ['sort', 'Order', 'number'],
   ],
   gallery: [
-    ['caption', 'Caption'], ['image_url', 'Image URL'], ['span', 'Size (blank / feature / wide / tall)'],
+    ['caption', 'Caption'], ['image_url', 'Image', 'image'], ['span', 'Size (blank / feature / wide / tall)'],
     ['sort', 'Order', 'number'],
   ],
   services: [
@@ -191,6 +191,20 @@ function Dashboard({ sb, session, tab, setTab }) {
     return json;
   }, [session.access_token]);
 
+  // Uploads a JPG/PNG/WebP to Supabase Storage, returns its public URL.
+  const upload = useCallback(async (file) => {
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch('/api/admin/upload', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      body: form,
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Upload failed');
+    return json.url;
+  }, [session.access_token]);
+
   useEffect(() => {
     (async () => {
       try {
@@ -229,7 +243,7 @@ function Dashboard({ sb, session, tab, setTab }) {
         {tab === 'enquiries' && <Enquiries api={api} />}
         {tab === 'appearance' && <AppearanceEditor api={api} />}
         {tab === 'text' && <ContentEditor api={api} />}
-        {['cars', 'routes', 'testimonials', 'gallery'].includes(tab) && <TableEditor key={tab} table={tab} api={api} />}
+        {['cars', 'routes', 'testimonials', 'gallery'].includes(tab) && <TableEditor key={tab} table={tab} api={api} upload={upload} />}
         {tab === 'sections' && (
           <>
             <h1 className="admin-title">Page Sections</h1>
@@ -240,7 +254,7 @@ function Dashboard({ sb, session, tab, setTab }) {
             <TableEditor table="brand_values" api={api} compact />
           </>
         )}
-        {tab === 'settings' && <Settings api={api} />}
+        {tab === 'settings' && <Settings api={api} upload={upload} />}
       </main>
     </div>
   );
@@ -322,7 +336,42 @@ function Enquiries({ api }) {
   );
 }
 
-function TableEditor({ table, api, compact }) {
+// Image field: thumbnail preview + JPG upload to Supabase Storage + URL fallback.
+function ImageField({ value, onChange, upload, small }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
+
+  async function pick(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !upload) return;
+    setBusy(true); setErr(null);
+    try {
+      const url = await upload(file);
+      onChange(url);
+    } catch (ex) { setErr(ex.message); }
+    setBusy(false);
+  }
+
+  return (
+    <div className="img-cell" style={small ? undefined : { minWidth: 240 }}>
+      {value
+        ? <img src={value} alt="" className="img-thumb" />
+        : <span className="img-thumb empty">—</span>}
+      <div className="img-actions">
+        <label className={`admin-btn ghost img-upload ${busy ? 'busy' : ''}`}>
+          {busy ? 'Uploading…' : '⬆ Upload image'}
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} disabled={busy} hidden />
+        </label>
+        <input className="admin-input" placeholder="…or paste an image URL"
+          value={value ?? ''} onChange={(e) => onChange(e.target.value)} />
+        {err && <span className="admin-note err">{err}</span>}
+      </div>
+    </div>
+  );
+}
+
+function TableEditor({ table, api, compact, upload }) {
   const cols = COLUMNS[table];
   const [rows, setRows] = useState(null);
   const [err, setErr] = useState(null);
@@ -402,11 +451,13 @@ function TableEditor({ table, api, compact }) {
             {rows.map((r, i) => (
               <tr key={r.id}>
                 {cols.map(([k, , type]) => (
-                  <td key={k} style={{ minWidth: type === 'textarea' ? 220 : k === 'image_url' ? 200 : 90 }}>
-                    {type === 'textarea'
-                      ? <textarea className="admin-textarea" value={r[k] ?? ''} onChange={(e) => edit(i, k, e.target.value)} />
-                      : <input className="admin-input" type={type || 'text'} value={r[k] ?? ''}
-                          onChange={(e) => edit(i, k, type === 'number' ? Number(e.target.value) : e.target.value)} />}
+                  <td key={k} style={{ minWidth: type === 'textarea' ? 220 : type === 'image' ? 250 : 90 }}>
+                    {type === 'image'
+                      ? <ImageField value={r[k]} onChange={(v) => edit(i, k, v)} upload={upload} />
+                      : type === 'textarea'
+                        ? <textarea className="admin-textarea" value={r[k] ?? ''} onChange={(e) => edit(i, k, e.target.value)} />
+                        : <input className="admin-input" type={type || 'text'} value={r[k] ?? ''}
+                            onChange={(e) => edit(i, k, type === 'number' ? Number(e.target.value) : e.target.value)} />}
                   </td>
                 ))}
                 <td><button className="admin-btn danger" onClick={() => remove(r.id)}>✕</button></td>
@@ -419,7 +470,7 @@ function TableEditor({ table, api, compact }) {
   );
 }
 
-function Settings({ api }) {
+function Settings({ api, upload }) {
   const [row, setRow] = useState(null);
   const [err, setErr] = useState(null);
   const [note, setNote] = useState(null);
@@ -440,8 +491,8 @@ function Settings({ api }) {
     ['email', 'Email'],
     ['address', 'Office address'],
     ['whatsapp_message', 'Default WhatsApp message'],
-    ['hero_image', 'Homepage hero image URL'],
-    ['about_image', 'About page image URL'],
+    ['hero_image', 'Homepage hero background image', 'image'],
+    ['about_image', 'About page image', 'image'],
   ];
 
   async function save() {
@@ -459,11 +510,15 @@ function Settings({ api }) {
       <p className="admin-sub">Contact details and key images used across every page.</p>
       <div className="admin-card" style={{ maxWidth: 640 }}>
         <div className="form-grid">
-          {FIELDS.map(([k, label]) => (
+          {FIELDS.map(([k, label, type]) => (
             <div key={k} className="form-field">
               <label>{label}</label>
-              <input className="admin-input" style={{ marginTop: 7, padding: '11px 13px' }}
-                value={row[k] ?? ''} onChange={(e) => setRow({ ...row, [k]: e.target.value })} />
+              {type === 'image'
+                ? <div style={{ marginTop: 7 }}>
+                    <ImageField value={row[k]} onChange={(v) => setRow({ ...row, [k]: v })} upload={upload} small />
+                  </div>
+                : <input className="admin-input" style={{ marginTop: 7, padding: '11px 13px' }}
+                    value={row[k] ?? ''} onChange={(e) => setRow({ ...row, [k]: e.target.value })} />}
             </div>
           ))}
           <div className="admin-toolbar" style={{ marginBottom: 0 }}>

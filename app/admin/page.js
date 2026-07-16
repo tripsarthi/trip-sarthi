@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 import { DEFAULT_CONTENT } from '@/lib/defaults';
+import { HOME_SECTIONS, parseLayout, defaultLayout } from '@/lib/homeLayout';
 
 const SECTIONS = [
   { key: 'overview', label: 'Overview', icon: '◈' },
@@ -604,25 +605,71 @@ const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 function AppearanceEditor({ api }) {
   const [vals, setVals] = useState(null);
+  const [layout, setLayout] = useState(null);
   const [err, setErr] = useState(null);
   const [note, setNote] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [device, setDevice] = useState('desktop');
+  const [previewKey, setPreviewKey] = useState(0);
+  const [dragId, setDragId] = useState(null);
+  const [scale, setScale] = useState(1);
+  const dragRef = useRef(null);
+  const roRef = useRef(null);
+
+  // Scale the desktop (1280px) preview down to fit the column width.
+  const setWrap = useCallback((node) => {
+    if (roRef.current) { roRef.current.disconnect(); roRef.current = null; }
+    if (!node) return;
+    const compute = () => setScale(device === 'mobile' ? 1 : Math.min(1, node.clientWidth / 1280));
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(node);
+    roRef.current = ro;
+  }, [device]);
 
   useEffect(() => {
     api({ action: 'list', table: 'content' })
       .then(({ data }) => {
         const merged = {};
         for (const k of THEME_KEYS) merged[k] = DEFAULT_CONTENT[k];
-        for (const row of data) if (THEME_KEYS.includes(row.key)) merged[row.key] = row.value;
+        let rawLayout = DEFAULT_CONTENT.home_layout;
+        for (const row of data) {
+          if (THEME_KEYS.includes(row.key)) merged[row.key] = row.value;
+          if (row.key === 'home_layout') rawLayout = row.value;
+        }
         setVals(merged);
+        setLayout(parseLayout(rawLayout));
       })
       .catch((e) => setErr(e.message));
   }, [api]);
 
   if (err) return <SchemaHint title="Appearance" err={err} />;
-  if (!vals) return <p className="admin-note">Loading…</p>;
+  if (!vals || !layout) return <p className="admin-note">Loading…</p>;
 
   const set = (k) => (e) => setVals({ ...vals, [k]: e.target.value });
+  const meta = (id) => HOME_SECTIONS.find((s) => s.id === id) || { label: id };
+
+  function toggle(id) {
+    if (meta(id).locked) return;
+    setLayout(layout.map((r) => (r.id === id ? { ...r, v: r.v ? 0 : 1 } : r)));
+  }
+  function move(index, dir) {
+    const to = index + dir;
+    if (index === 0 || to < 1 || to >= layout.length) return; // hero pinned at top
+    const next = [...layout];
+    [next[index], next[to]] = [next[to], next[index]];
+    setLayout(next);
+  }
+  function onDrop(targetId) {
+    const from = layout.findIndex((r) => r.id === dragRef.current);
+    const to = layout.findIndex((r) => r.id === targetId);
+    setDragId(null); dragRef.current = null;
+    if (from < 1 || to < 1 || from === to) return; // hero stays first
+    const next = [...layout];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setLayout(next);
+  }
 
   async function save() {
     if (!HEX_RE.test(vals.theme_brand) || !HEX_RE.test(vals.theme_brand_deep)) {
@@ -632,8 +679,10 @@ function AppearanceEditor({ api }) {
     setBusy(true); setNote(null);
     try {
       const rows = THEME_KEYS.map((key) => ({ key, value: vals[key] }));
+      rows.push({ key: 'home_layout', value: JSON.stringify(layout) });
       await api({ action: 'upsert', table: 'content', rows });
-      setNote({ ok: true, text: 'Saved. The website now uses the new look.' });
+      setNote({ ok: true, text: 'Saved — preview updated below.' });
+      setPreviewKey((k) => k + 1); // reload the iframe (cache purged on save)
     } catch (e) { setNote({ ok: false, text: e.message }); }
     setBusy(false);
   }
@@ -642,85 +691,145 @@ function AppearanceEditor({ api }) {
     const d = {};
     for (const k of THEME_KEYS) d[k] = DEFAULT_CONTENT[k];
     setVals(d);
-    setNote({ ok: true, text: 'Reset to Trip Sarthi defaults — hit Save to apply.' });
+    setLayout(defaultLayout());
+    setNote({ ok: true, text: 'Reset to defaults — hit Save to apply.' });
   }
 
   const radius = vals.theme_btn_shape === 'rounded' ? 12 : 999;
+  const isMobile = device === 'mobile';
+  const frameScale = isMobile ? 1 : scale;
 
   return (
     <>
       <h1 className="admin-title">Appearance</h1>
-      <p className="admin-sub">Change the website&apos;s button colors, shape and placements — no code needed.</p>
+      <p className="admin-sub">Reorder or hide homepage sections, change colors &amp; placements — then Save to publish.</p>
 
-      <div className="admin-toolbar">
-        <button className="admin-btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save & apply'}</button>
+      <div className="admin-toolbar" style={{ position: 'sticky', top: 0, zIndex: 5, background: '#f6f4ee', padding: '8px 0' }}>
+        <button className="admin-btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save & publish'}</button>
         <button className="admin-btn ghost" onClick={reset} disabled={busy}>Reset to default</button>
         {note && <span className={`admin-note ${note.ok ? 'ok' : 'err'}`}>{note.text}</span>}
       </div>
 
-      <div className="admin-card" style={{ maxWidth: 640 }}>
-        <div style={{ font: '800 15px var(--sora)', color: 'var(--ink)', marginBottom: 14 }}>Colors</div>
-        <div className="form-grid">
-          <div className="form-field">
-            <label>Primary color (buttons, highlights, accents)</label>
-            <div className="swatch-row" style={{ marginTop: 7 }}>
-              <input type="color" value={HEX_RE.test(vals.theme_brand) ? vals.theme_brand : '#F5B301'}
-                onChange={set('theme_brand')} aria-label="Primary color picker" />
-              <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand} onChange={set('theme_brand')} />
+      <div className="appearance-cols">
+        {/* ---- Left: controls ---- */}
+        <div>
+          <div className="admin-card">
+            <div className="ap-h">Homepage sections</div>
+            <div className="ap-hint">Drag to reorder, or use the arrows. Toggle the eye to show / hide a section. The hero stays on top.</div>
+            <div className="sec-list">
+              {layout.map((row, i) => {
+                const m = meta(row.id);
+                return (
+                  <div
+                    key={row.id}
+                    className={`sec-row ${row.v ? '' : 'hidden'} ${dragId === row.id ? 'dragging' : ''} ${m.locked ? 'locked' : ''}`}
+                    draggable={!m.locked}
+                    onDragStart={() => { setDragId(row.id); dragRef.current = row.id; }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => onDrop(row.id)}
+                    onDragEnd={() => { setDragId(null); dragRef.current = null; }}
+                  >
+                    <span className="sec-handle" aria-hidden="true">{m.locked ? '★' : '⋮⋮'}</span>
+                    <span className="sec-label">{m.label}{m.locked && <em> · fixed</em>}</span>
+                    <span className="sec-tools">
+                      <button className="sec-btn" onClick={() => move(i, -1)} disabled={i <= 1} aria-label="Move up">↑</button>
+                      <button className="sec-btn" onClick={() => move(i, 1)} disabled={i === 0 || i === layout.length - 1} aria-label="Move down">↓</button>
+                      <button
+                        className={`sec-eye ${row.v ? 'on' : 'off'}`}
+                        onClick={() => toggle(row.id)}
+                        disabled={m.locked}
+                        aria-label={row.v ? 'Hide section' : 'Show section'}
+                        title={m.locked ? 'Always shown' : row.v ? 'Visible — click to hide' : 'Hidden — click to show'}
+                      >{row.v ? '👁' : '🚫'}</button>
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          <div className="form-field">
-            <label>Dark accent (links, prices, small headings)</label>
-            <div className="swatch-row" style={{ marginTop: 7 }}>
-              <input type="color" value={HEX_RE.test(vals.theme_brand_deep) ? vals.theme_brand_deep : '#C98A00'}
-                onChange={set('theme_brand_deep')} aria-label="Dark accent color picker" />
-              <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand_deep} onChange={set('theme_brand_deep')} />
+
+          <div className="admin-card">
+            <div className="ap-h">Colors</div>
+            <div className="form-grid">
+              <div className="form-field">
+                <label>Primary color (buttons, highlights, accents)</label>
+                <div className="swatch-row" style={{ marginTop: 7 }}>
+                  <input type="color" value={HEX_RE.test(vals.theme_brand) ? vals.theme_brand : '#F5B301'}
+                    onChange={set('theme_brand')} aria-label="Primary color picker" />
+                  <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand} onChange={set('theme_brand')} />
+                </div>
+              </div>
+              <div className="form-field">
+                <label>Dark accent (links, prices, small headings)</label>
+                <div className="swatch-row" style={{ marginTop: 7 }}>
+                  <input type="color" value={HEX_RE.test(vals.theme_brand_deep) ? vals.theme_brand_deep : '#C98A00'}
+                    onChange={set('theme_brand_deep')} aria-label="Dark accent color picker" />
+                  <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand_deep} onChange={set('theme_brand_deep')} />
+                </div>
+              </div>
+              <div className="theme-preview">
+                <span style={{ display: 'inline-block', padding: '12px 24px', borderRadius: radius, background: vals.theme_brand, color: '#14110a', font: '700 13px var(--sora)' }}>Book Now</span>
+                <span style={{ display: 'inline-block', padding: '12px 24px', borderRadius: radius, background: '#14110a', color: '#fff', font: '700 13px var(--sora)' }}>Call Us</span>
+                <span style={{ font: '800 15px var(--sora)', color: vals.theme_brand_deep }}>₹13/KM</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-card">
+            <div className="ap-h">Shape &amp; placement</div>
+            <div className="form-grid">
+              <div className="form-field">
+                <label>Button shape</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_btn_shape} onChange={set('theme_btn_shape')}>
+                  <option value="pill">Pill (fully rounded)</option>
+                  <option value="rounded">Rounded rectangle</option>
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Home hero — booking form side</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_form} onChange={set('theme_hero_form')}>
+                  <option value="right">Right (text left, form right)</option>
+                  <option value="left">Left (form left, text right)</option>
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Floating call / WhatsApp buttons</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_float_pos} onChange={set('theme_float_pos')}>
+                  <option value="right">Bottom right</option>
+                  <option value="left">Bottom left</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="admin-card" style={{ maxWidth: 640 }}>
-        <div style={{ font: '800 15px var(--sora)', color: 'var(--ink)', marginBottom: 14 }}>Shape &amp; placement</div>
-        <div className="form-grid">
-          <div className="form-field">
-            <label>Button shape</label>
-            <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_btn_shape} onChange={set('theme_btn_shape')}>
-              <option value="pill">Pill (fully rounded)</option>
-              <option value="rounded">Rounded rectangle</option>
-            </select>
+        {/* ---- Right: live preview ---- */}
+        <div className="ap-preview-col">
+          <div className="ap-preview-bar">
+            <span className="ap-h" style={{ margin: 0 }}>Live preview</span>
+            <span className="ap-device">
+              <button className={device === 'desktop' ? 'on' : ''} onClick={() => setDevice('desktop')}>🖥 Desktop</button>
+              <button className={device === 'mobile' ? 'on' : ''} onClick={() => setDevice('mobile')}>📱 Mobile</button>
+              <button onClick={() => setPreviewKey((k) => k + 1)} title="Reload preview">⟳</button>
+            </span>
           </div>
-          <div className="form-field">
-            <label>Home hero — booking form side</label>
-            <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_form} onChange={set('theme_hero_form')}>
-              <option value="right">Right (text left, form right)</option>
-              <option value="left">Left (form left, text right)</option>
-            </select>
+          <div className="ap-hint" style={{ marginBottom: 10 }}>Shows the published site. Save to see your section &amp; colour changes here.</div>
+          <div className="ap-frame-wrap" ref={setWrap}>
+            <div
+              className="ap-frame"
+              style={{ width: (isMobile ? 390 : 1280) * frameScale, height: 1600 * frameScale }}
+            >
+              <iframe
+                key={previewKey}
+                title="Website preview"
+                src="/?admin-preview=1"
+                style={{
+                  width: isMobile ? 390 : 1280, height: 1600, border: 0,
+                  transform: `scale(${frameScale})`, transformOrigin: 'top left',
+                }}
+              />
+            </div>
           </div>
-          <div className="form-field">
-            <label>Floating call / WhatsApp buttons</label>
-            <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_float_pos} onChange={set('theme_float_pos')}>
-              <option value="right">Bottom right</option>
-              <option value="left">Bottom left</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="admin-card" style={{ maxWidth: 640 }}>
-        <div style={{ font: '800 15px var(--sora)', color: 'var(--ink)', marginBottom: 14 }}>Live preview</div>
-        <div className="theme-preview">
-          <span style={{
-            display: 'inline-block', padding: '13px 28px', borderRadius: radius,
-            background: vals.theme_brand, color: '#14110a', font: '700 14px var(--sora)',
-            boxShadow: `0 8px 22px ${vals.theme_brand}55`,
-          }}>Book Now</span>
-          <span style={{
-            display: 'inline-block', padding: '13px 28px', borderRadius: radius,
-            background: '#14110a', color: '#fff', font: '700 14px var(--sora)',
-          }}>Call Us</span>
-          <span style={{ font: '800 16px var(--sora)', color: vals.theme_brand_deep }}>₹13/KM</span>
-          <span style={{ font: '700 12px var(--manrope)', letterSpacing: '.14em', textTransform: 'uppercase', color: vals.theme_brand_deep }}>Section heading</span>
         </div>
       </div>
     </>

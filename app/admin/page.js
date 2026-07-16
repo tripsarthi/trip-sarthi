@@ -600,7 +600,11 @@ function ContentEditor({ api }) {
   );
 }
 
-const THEME_KEYS = ['theme_brand', 'theme_brand_deep', 'theme_btn_shape', 'theme_hero_form', 'theme_float_pos'];
+const THEME_KEYS = [
+  'theme_brand', 'theme_brand_deep', 'theme_cream',
+  'theme_btn_shape', 'theme_btn_size', 'theme_card_radius', 'theme_section_pad',
+  'theme_hero_height', 'theme_hero_overlay', 'theme_hero_form', 'theme_float_pos',
+];
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 function AppearanceEditor({ api }) {
@@ -613,8 +617,10 @@ function AppearanceEditor({ api }) {
   const [previewKey, setPreviewKey] = useState(0);
   const [dragId, setDragId] = useState(null);
   const [scale, setScale] = useState(1);
+  const [selectedSec, setSelectedSec] = useState(null);
   const dragRef = useRef(null);
   const roRef = useRef(null);
+  const iframeRef = useRef(null);
 
   // Scale the desktop (1280px) preview down to fit the column width.
   const setWrap = useCallback((node) => {
@@ -626,6 +632,18 @@ function AppearanceEditor({ api }) {
     ro.observe(node);
     roRef.current = ro;
   }, [device]);
+
+  // Click a section in the preview → select its row here.
+  useEffect(() => {
+    const onMsg = (e) => {
+      if (e.data?.type === 'ts-select-section') {
+        setSelectedSec(e.data.id);
+        document.querySelector(`[data-secrow="${e.data.id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
 
   useEffect(() => {
     api({ action: 'list', table: 'content' })
@@ -652,6 +670,13 @@ function AppearanceEditor({ api }) {
   function toggle(id) {
     if (meta(id).locked) return;
     setLayout(layout.map((r) => (r.id === id ? { ...r, v: r.v ? 0 : 1 } : r)));
+  }
+  function setBg(id, bg) {
+    setLayout(layout.map((r) => (r.id === id ? { ...r, bg } : r)));
+  }
+  function highlightInPreview(id) {
+    setSelectedSec(id);
+    iframeRef.current?.contentWindow?.postMessage({ type: 'ts-highlight', id }, '*');
   }
   function move(index, dir) {
     const to = index + dir;
@@ -719,29 +744,52 @@ function AppearanceEditor({ api }) {
             <div className="sec-list">
               {layout.map((row, i) => {
                 const m = meta(row.id);
+                const open = selectedSec === row.id;
                 return (
                   <div
                     key={row.id}
-                    className={`sec-row ${row.v ? '' : 'hidden'} ${dragId === row.id ? 'dragging' : ''} ${m.locked ? 'locked' : ''}`}
+                    data-secrow={row.id}
+                    className={`sec-row ${row.v ? '' : 'hidden'} ${dragId === row.id ? 'dragging' : ''} ${m.locked ? 'locked' : ''} ${open ? 'selected' : ''}`}
                     draggable={!m.locked}
                     onDragStart={() => { setDragId(row.id); dragRef.current = row.id; }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={() => onDrop(row.id)}
                     onDragEnd={() => { setDragId(null); dragRef.current = null; }}
                   >
-                    <span className="sec-handle" aria-hidden="true">{m.locked ? '★' : '⋮⋮'}</span>
-                    <span className="sec-label">{m.label}{m.locked && <em> · fixed</em>}</span>
-                    <span className="sec-tools">
-                      <button className="sec-btn" onClick={() => move(i, -1)} disabled={i <= 1} aria-label="Move up">↑</button>
-                      <button className="sec-btn" onClick={() => move(i, 1)} disabled={i === 0 || i === layout.length - 1} aria-label="Move down">↓</button>
-                      <button
-                        className={`sec-eye ${row.v ? 'on' : 'off'}`}
-                        onClick={() => toggle(row.id)}
-                        disabled={m.locked}
-                        aria-label={row.v ? 'Hide section' : 'Show section'}
-                        title={m.locked ? 'Always shown' : row.v ? 'Visible — click to hide' : 'Hidden — click to show'}
-                      >{row.v ? '👁' : '🚫'}</button>
-                    </span>
+                    <div className="sec-main">
+                      <span className="sec-handle" aria-hidden="true">{m.locked ? '★' : '⋮⋮'}</span>
+                      <button className="sec-label" onClick={() => highlightInPreview(row.id)} title="Select & highlight in preview">
+                        {m.label}{m.locked && <em> · fixed</em>}
+                      </button>
+                      <span className="sec-tools">
+                        <button className="sec-btn" onClick={() => move(i, -1)} disabled={i <= 1} aria-label="Move up">↑</button>
+                        <button className="sec-btn" onClick={() => move(i, 1)} disabled={i === 0 || i === layout.length - 1} aria-label="Move down">↓</button>
+                        <button
+                          className={`sec-eye ${row.v ? 'on' : 'off'}`}
+                          onClick={() => toggle(row.id)}
+                          disabled={m.locked}
+                          aria-label={row.v ? 'Hide section' : 'Show section'}
+                          title={m.locked ? 'Always shown' : row.v ? 'Visible — click to hide' : 'Hidden — click to show'}
+                        >{row.v ? '👁' : '🚫'}</button>
+                      </span>
+                    </div>
+                    {open && (
+                      <div className="sec-settings">
+                        {m.bg ? (
+                          <>
+                            <label>Background</label>
+                            <div className="seg">
+                              <button className={(row.bg || m.bg) === 'white' ? 'on' : ''} onClick={() => setBg(row.id, 'white')}>White</button>
+                              <button className={(row.bg || m.bg) === 'cream' ? 'on' : ''} onClick={() => setBg(row.id, 'cream')}>Cream</button>
+                            </div>
+                          </>
+                        ) : (
+                          <span className="ap-hint" style={{ margin: 0 }}>
+                            {m.locked ? 'Always shown at the top. Its colours follow the global theme.' : 'This section’s colours follow the global theme (edit them below).'}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -767,7 +815,15 @@ function AppearanceEditor({ api }) {
                   <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand_deep} onChange={set('theme_brand_deep')} />
                 </div>
               </div>
-              <div className="theme-preview">
+              <div className="form-field">
+                <label>Light section background (tinted bands)</label>
+                <div className="swatch-row" style={{ marginTop: 7 }}>
+                  <input type="color" value={HEX_RE.test(vals.theme_cream) ? vals.theme_cream : '#faf8f3'}
+                    onChange={set('theme_cream')} aria-label="Light section background picker" />
+                  <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_cream} onChange={set('theme_cream')} />
+                </div>
+              </div>
+              <div className="theme-preview" style={{ background: vals.theme_cream }}>
                 <span style={{ display: 'inline-block', padding: '12px 24px', borderRadius: radius, background: vals.theme_brand, color: '#14110a', font: '700 13px var(--sora)' }}>Book Now</span>
                 <span style={{ display: 'inline-block', padding: '12px 24px', borderRadius: radius, background: '#14110a', color: '#fff', font: '700 13px var(--sora)' }}>Call Us</span>
                 <span style={{ font: '800 15px var(--sora)', color: vals.theme_brand_deep }}>₹13/KM</span>
@@ -776,8 +832,8 @@ function AppearanceEditor({ api }) {
           </div>
 
           <div className="admin-card">
-            <div className="ap-h">Shape &amp; placement</div>
-            <div className="form-grid">
+            <div className="ap-h">Buttons &amp; cards</div>
+            <div className="form-grid ap-two">
               <div className="form-field">
                 <label>Button shape</label>
                 <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_btn_shape} onChange={set('theme_btn_shape')}>
@@ -786,14 +842,58 @@ function AppearanceEditor({ api }) {
                 </select>
               </div>
               <div className="form-field">
-                <label>Home hero — booking form side</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_form} onChange={set('theme_hero_form')}>
-                  <option value="right">Right (text left, form right)</option>
-                  <option value="left">Left (form left, text right)</option>
+                <label>Button size</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_btn_size} onChange={set('theme_btn_size')}>
+                  <option value="normal">Normal</option>
+                  <option value="large">Large</option>
                 </select>
               </div>
               <div className="form-field">
-                <label>Floating call / WhatsApp buttons</label>
+                <label>Card corners</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_card_radius} onChange={set('theme_card_radius')}>
+                  <option value="sharp">Sharp</option>
+                  <option value="soft">Soft (default)</option>
+                  <option value="round">Very round</option>
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Section spacing</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_section_pad} onChange={set('theme_section_pad')}>
+                  <option value="compact">Compact</option>
+                  <option value="normal">Normal</option>
+                  <option value="roomy">Roomy</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-card">
+            <div className="ap-h">Hero &amp; placement</div>
+            <div className="form-grid ap-two">
+              <div className="form-field">
+                <label>Hero height</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_height} onChange={set('theme_hero_height')}>
+                  <option value="standard">Standard</option>
+                  <option value="tall">Tall</option>
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Hero photo tint</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_overlay} onChange={set('theme_hero_overlay')}>
+                  <option value="light">Light</option>
+                  <option value="medium">Medium</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Hero — booking form side</label>
+                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_form} onChange={set('theme_hero_form')}>
+                  <option value="right">Right</option>
+                  <option value="left">Left</option>
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Floating call / WhatsApp</label>
                 <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_float_pos} onChange={set('theme_float_pos')}>
                   <option value="right">Bottom right</option>
                   <option value="left">Bottom left</option>
@@ -813,13 +913,14 @@ function AppearanceEditor({ api }) {
               <button onClick={() => setPreviewKey((k) => k + 1)} title="Reload preview">⟳</button>
             </span>
           </div>
-          <div className="ap-hint" style={{ marginBottom: 10 }}>Shows the published site. Save to see your section &amp; colour changes here.</div>
+          <div className="ap-hint" style={{ marginBottom: 10 }}>Click any section in the preview to select it on the left. Save to publish colour &amp; layout changes.</div>
           <div className="ap-frame-wrap" ref={setWrap}>
             <div
               className="ap-frame"
               style={{ width: (isMobile ? 390 : 1280) * frameScale, height: 1600 * frameScale }}
             >
               <iframe
+                ref={iframeRef}
                 key={previewKey}
                 title="Website preview"
                 src="/?admin-preview=1"

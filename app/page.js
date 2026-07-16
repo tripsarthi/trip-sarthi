@@ -4,6 +4,7 @@ import QuoteForm from '@/components/QuoteForm';
 import EstimateForm from '@/components/EstimateForm';
 import CarCard from '@/components/CarCard';
 import Img from '@/components/Img';
+import PreviewBridge from '@/components/PreviewBridge';
 import { parseLayout } from '@/lib/homeLayout';
 
 // Pages are statically cached; the admin API purges the cache on every save,
@@ -12,15 +13,19 @@ export const revalidate = 3600;
 
 const FEATURE_ICONS = ['₹', '✓', '◈', '➤'];
 
-// Each homepage section, keyed by id. Order & visibility come from the CMS
-// (home_layout), edited visually in the admin Appearance → Layout editor.
+// cream / white background for a bg-swappable section
+const bgClass = (row) => (row?.bg === 'cream' ? 'cream' : '');
+
+// Each homepage section, keyed by id. Order, visibility & background come from
+// the CMS (home_layout), edited visually in admin Appearance → Layout editor.
+// Every section carries data-sec so the preview can highlight & select it.
 const SECTIONS = {
   hero: (c, t) => {
     const h1Words = t.home_h1.split(' ');
     const h1Main = h1Words.slice(0, -2).join(' ');
     const h1Accent = h1Words.slice(-2).join(' ');
     return (
-      <section className="hero3" key="hero">
+      <section className="hero3" key="hero" data-sec="hero" data-sec-label="Hero">
         <div className="hero3-bg"><Img src={c.settings.hero_image} alt="" priority sizes="100vw" /></div>
         <div className="hero3-fade" />
         <div className={`wrap hero3-grid ${t.theme_hero_form === 'left' ? 'form-left' : ''}`}>
@@ -47,32 +52,34 @@ const SECTIONS = {
     );
   },
 
-  intro: (c, t) => (
-    <section className="wrap section2" key="intro">
-      <div className="intro-grid">
-        <div>
-          <div className="kick2">About the service</div>
-          <h2 className="h-orange">{t.intro_h2}</h2>
-          <p className="p-body">{t.intro_p1}</p>
-          <p className="p-body">{t.intro_p2}</p>
-        </div>
-        <div className="icards">
-          {c.features.map((f, i) => (
-            <div key={f.id} className="icard">
-              <div className="ic">{FEATURE_ICONS[i % FEATURE_ICONS.length]}</div>
-              <div className="t">{f.title}</div>
-              <div className="d">{f.sub}</div>
-            </div>
-          ))}
+  intro: (c, t, row) => (
+    <section className={bgClass(row)} key="intro" data-sec="intro" data-sec-label="Intro">
+      <div className="wrap section2">
+        <div className="intro-grid">
+          <div>
+            <div className="kick2">About the service</div>
+            <h2 className="h-orange">{t.intro_h2}</h2>
+            <p className="p-body">{t.intro_p1}</p>
+            <p className="p-body">{t.intro_p2}</p>
+          </div>
+          <div className="icards">
+            {c.features.map((f, i) => (
+              <div key={f.id} className="icard">
+                <div className="ic">{FEATURE_ICONS[i % FEATURE_ICONS.length]}</div>
+                <div className="t">{f.title}</div>
+                <div className="d">{f.sub}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
   ),
 
-  offer1: (c) => <OfferBand c={c} key="offer1" />,
+  offer1: (c) => <div key="offer1" data-sec="offer1" data-sec-label="Offer banner"><OfferBand c={c} /></div>,
 
-  services: (c, t) => (
-    <section className="cream" key="services">
+  services: (c, t, row) => (
+    <section className={bgClass(row)} key="services" data-sec="services" data-sec-label="Services">
       <div className="wrap section2">
         <div className="center-head">
           <div className="kick2">{t.services_kicker}</div>
@@ -92,7 +99,7 @@ const SECTIONS = {
   ),
 
   how: (c, t) => (
-    <section className="dark-band" key="how">
+    <section className="dark-band" key="how" data-sec="how" data-sec-label="How to book">
       <div className="wrap section2">
         <div className="center-head" style={{ marginBottom: 18 }}>
           <div className="kick2" style={{ color: 'var(--brand)' }}>Simple &amp; fast</div>
@@ -112,29 +119,31 @@ const SECTIONS = {
     </section>
   ),
 
-  why: (c, t) => (
-    <section className="wrap section2" key="why">
-      <div className="center-head" style={{ marginBottom: 18 }}>
-        <div className="kick2">Our promise</div>
-        <h2 className="title2">{t.why_title}</h2>
-      </div>
-      <p className="why-lead">{t.why_intro}</p>
-      <div className="why-grid">
-        {c.values.map((v) => (
-          <div key={v.id} className="why-card">
-            <span className="check">✓</span>
-            <div>
-              <div className="t">{v.title}</div>
-              <div className="d">{v.description}</div>
+  why: (c, t, row) => (
+    <section className={bgClass(row)} key="why" data-sec="why" data-sec-label="Why choose us">
+      <div className="wrap section2">
+        <div className="center-head" style={{ marginBottom: 18 }}>
+          <div className="kick2">Our promise</div>
+          <h2 className="title2">{t.why_title}</h2>
+        </div>
+        <p className="why-lead">{t.why_intro}</p>
+        <div className="why-grid">
+          {c.values.map((v) => (
+            <div key={v.id} className="why-card">
+              <span className="check">✓</span>
+              <div>
+                <div className="t">{v.title}</div>
+                <div className="d">{v.description}</div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   ),
 
-  cars: (c, t) => (
-    <section className="cream" key="cars">
+  cars: (c, t, row) => (
+    <section className={bgClass(row)} key="cars" data-sec="cars" data-sec-label="Car classes">
       <div className="wrap section2">
         <div className="center-head">
           <div className="kick2">{t.cars_kicker}</div>
@@ -147,26 +156,28 @@ const SECTIONS = {
     </section>
   ),
 
-  places: (c, t) => (
-    <section className="wrap section2" key="places">
-      <div className="center-head">
-        <div className="kick2">Outstation favourites</div>
-        <h2 className="title2">{t.places_title} Delhi</h2>
-      </div>
-      <div className="place-pills">
-        {c.routes.map((r) => (
-          <a key={r.id} href={c.wa} target="_blank" rel="noopener" className="place-pill">
-            {r.title.replace('→', 'to')}
-            <span className="price">{r.price}</span>
-            <span className="arrow">→</span>
-          </a>
-        ))}
+  places: (c, t, row) => (
+    <section className={bgClass(row)} key="places" data-sec="places" data-sec-label="Popular routes">
+      <div className="wrap section2">
+        <div className="center-head">
+          <div className="kick2">Outstation favourites</div>
+          <h2 className="title2">{t.places_title} Delhi</h2>
+        </div>
+        <div className="place-pills">
+          {c.routes.map((r) => (
+            <a key={r.id} href={c.wa} target="_blank" rel="noopener" className="place-pill">
+              {r.title.replace('→', 'to')}
+              <span className="price">{r.price}</span>
+              <span className="arrow">→</span>
+            </a>
+          ))}
+        </div>
       </div>
     </section>
   ),
 
-  estimate: (c, t) => (
-    <section className="cream" key="estimate">
+  estimate: (c, t, row) => (
+    <section className={bgClass(row)} key="estimate" data-sec="estimate" data-sec-label="Estimate form">
       <div className="wrap" style={{ paddingTop: 64, paddingBottom: 64 }}>
         <div className="est-card">
           <div>
@@ -181,28 +192,30 @@ const SECTIONS = {
     </section>
   ),
 
-  reviews: (c, t) => (
-    <section className="wrap section2" key="reviews">
-      <div className="center-head">
-        <div className="kick2">{t.reviews_kicker}</div>
-        <h2 className="title2">{t.reviews_title}</h2>
-      </div>
-      <div className="testi-grid">
-        {c.testimonials.map((tm) => (
-          <div key={tm.id} className="testi2">
-            <div className="stars">{'★'.repeat(tm.stars)}</div>
-            <p>{tm.quote}</p>
-            <div className="who">
-              <div className="avatar">{tm.name[0]}</div>
-              <div><div className="n">{tm.name}</div><div className="m">{tm.meta}</div></div>
+  reviews: (c, t, row) => (
+    <section className={bgClass(row)} key="reviews" data-sec="reviews" data-sec-label="Testimonials">
+      <div className="wrap section2">
+        <div className="center-head">
+          <div className="kick2">{t.reviews_kicker}</div>
+          <h2 className="title2">{t.reviews_title}</h2>
+        </div>
+        <div className="testi-grid">
+          {c.testimonials.map((tm) => (
+            <div key={tm.id} className="testi2">
+              <div className="stars">{'★'.repeat(tm.stars)}</div>
+              <p>{tm.quote}</p>
+              <div className="who">
+                <div className="avatar">{tm.name[0]}</div>
+                <div><div className="n">{tm.name}</div><div className="m">{tm.meta}</div></div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   ),
 
-  offer2: (c) => <OfferBand c={c} key="offer2" />,
+  offer2: (c) => <div key="offer2" data-sec="offer2" data-sec-label="Offer banner"><OfferBand c={c} /></div>,
 };
 
 export default async function Home() {
@@ -226,10 +239,11 @@ export default async function Home() {
   return (
     <Shell c={c} active="/">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <PreviewBridge />
       <div className="fade">
         {layout
           .filter((row) => row.v && SECTIONS[row.id])
-          .map((row) => SECTIONS[row.id](c, t))}
+          .map((row) => SECTIONS[row.id](c, t, row))}
       </div>
     </Shell>
   );

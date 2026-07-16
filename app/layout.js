@@ -40,6 +40,12 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${sora.variable} ${manrope.variable}`}>
+      <head>
+        {/* Warm up connections to the image hosts so photos start downloading sooner */}
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://dciguceitnuwxctqwkkg.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
       <body>{children}</body>
     </html>
   );

@@ -119,19 +119,30 @@ export function Footer({ c }) {
         </div>
       </div>
       <div className="f-legal">{c.t.footer_legal}</div>
-      <div className="f-bottom">© {new Date().getFullYear()} Trip Sarthi. All Rights Reserved.</div>
+      <div className="f-bottom">
+        © {new Date().getFullYear()} Trip Sarthi. All Rights Reserved.
+        <Link href="/admin" className="f-admin">Admin</Link>
+      </div>
     </footer>
   );
 }
 
 // Admin-editable theme (Appearance tab) → CSS variable overrides.
 const HEX = /^#[0-9a-fA-F]{3,8}$/;
+const hx = (v, d) => (HEX.test(v || '') ? v : d);
 function ThemeStyle({ t }) {
-  const brand = HEX.test(t.theme_brand || '') ? t.theme_brand : '#F5B301';
-  const deep = HEX.test(t.theme_brand_deep || '') ? t.theme_brand_deep : '#C98A00';
+  const brand = hx(t.theme_brand, '#F5B301');
+  const deep = hx(t.theme_brand_deep, '#C98A00');
+  const cream = hx(t.theme_cream, '#faf8f3');
   const radius = t.theme_btn_shape === 'rounded' ? '12px' : '999px';
+  const btnPad = t.theme_btn_size === 'large' ? '16px 34px' : '14px 30px';
+  const btnFs = t.theme_btn_size === 'large' ? '16px' : '14.5px';
+  const card = t.theme_card_radius === 'sharp' ? '8px' : t.theme_card_radius === 'round' ? '26px' : '18px';
+  const secPad = t.theme_section_pad === 'compact' ? '52px' : t.theme_section_pad === 'roomy' ? '104px' : '78px';
+  const heroPad = t.theme_hero_height === 'tall' ? '108px' : '68px';
+  const ov = t.theme_hero_overlay === 'light' ? '.5' : t.theme_hero_overlay === 'dark' ? '.9' : '.72';
   return (
-    <style>{`:root{--brand:${brand};--brand-deep:${deep};--btn-radius:${radius};}`}</style>
+    <style>{`:root{--brand:${brand};--brand-deep:${deep};--cream:${cream};--btn-radius:${radius};--btn-pad:${btnPad};--btn-fs:${btnFs};--card-radius:${card};--sec-pad:${secPad};--hero-pad:${heroPad};--hero-ov:${ov};}`}</style>
   );
 }
 

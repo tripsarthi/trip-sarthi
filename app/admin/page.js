@@ -242,7 +242,7 @@ function Dashboard({ sb, session, tab, setTab }) {
       <main className="admin-main">
         {tab === 'overview' && <Overview counts={counts} setTab={setTab} />}
         {tab === 'enquiries' && <Enquiries api={api} />}
-        {tab === 'appearance' && <AppearanceEditor api={api} />}
+        {tab === 'appearance' && <AppearanceEditor api={api} setTab={setTab} upload={upload} />}
         {tab === 'text' && <ContentEditor api={api} />}
         {['cars', 'routes', 'testimonials', 'gallery'].includes(tab) && <TableEditor key={tab} table={tab} api={api} upload={upload} />}
         {tab === 'sections' && (
@@ -607,9 +607,121 @@ const THEME_KEYS = [
 ];
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
-function AppearanceEditor({ api }) {
-  const [vals, setVals] = useState(null);
+// What each homepage section exposes when you click it in the preview:
+// its own text/content, image, background and a jump to its list data.
+const SECTION_PANELS = {
+  hero: {
+    title: 'Hero + booking form', image: 'hero_image', imageLabel: 'Background photo',
+    fields: [['home_h1', 'Headline', 'textarea'], ['home_sub', 'Subtitle', 'textarea'], ['home_cta', 'Orange button label'], ['quoteform_title', 'Booking form title']],
+    heroOpts: true,
+  },
+  intro: {
+    title: 'Intro + feature cards', bg: true,
+    fields: [['intro_h2', 'Heading'], ['intro_p1', 'Paragraph 1', 'textarea'], ['intro_p2', 'Paragraph 2', 'textarea']],
+    manage: { tab: 'sections', label: 'Manage feature cards' },
+  },
+  offer1: { title: 'Offer banner (upper)', shared: 'Both offer banners share this text.', fields: [['offer_title', 'Title'], ['offer_cta', 'Button label']] },
+  services: {
+    title: 'What we offer', bg: true,
+    fields: [['services_kicker', 'Small heading'], ['services_title', 'Title']],
+    manage: { tab: 'sections', label: 'Manage service items' },
+  },
+  how: {
+    title: 'How to book', fields: [['how_title', 'Heading'], ['how_intro', 'Intro text', 'textarea']],
+    manage: { tab: 'sections', label: 'Manage steps' },
+  },
+  why: {
+    title: 'Why choose us', bg: true, fields: [['why_title', 'Heading'], ['why_intro', 'Intro text', 'textarea']],
+    manage: { tab: 'sections', label: 'Manage value points' },
+  },
+  cars: {
+    title: 'Car classes & rates', bg: true,
+    fields: [['cars_kicker', 'Small heading'], ['cars_title', 'Title'], ['car_line1', 'Card line 1'], ['car_line2', 'Card line 2'], ['car_note', 'Card note']],
+    manage: { tab: 'cars', label: 'Manage cars & rates' },
+  },
+  places: {
+    title: 'Popular routes', bg: true, fields: [['places_title', 'Heading (city added after)']],
+    manage: { tab: 'routes', label: 'Manage routes' },
+  },
+  estimate: { title: 'Get estimate form', bg: true, fields: [['estimate_title', 'Heading']] },
+  reviews: {
+    title: 'Testimonials', bg: true, fields: [['reviews_kicker', 'Small heading'], ['reviews_title', 'Title']],
+    manage: { tab: 'testimonials', label: 'Manage testimonials' },
+  },
+  offer2: { title: 'Offer banner (lower)', shared: 'Both offer banners share this text.', fields: [['offer_title', 'Title'], ['offer_cta', 'Button label']] },
+};
+
+// The contextual settings panel shown when a section is being edited.
+function SectionPanel({ id, content, setC, settings, setS, layoutRow, sectionBg, meta, upload, setTab, onBack }) {
+  const p = SECTION_PANELS[id];
+  const m = meta(id);
+  if (!p) return <div className="admin-card"><button className="admin-btn ghost" onClick={onBack}>← Sections</button></div>;
+  const bgNow = layoutRow?.bg || m.bg;
+  return (
+    <div className="admin-card">
+      <div className="sp-head">
+        <button className="admin-btn ghost sp-back" onClick={onBack}>← Sections</button>
+        <div className="ap-h" style={{ margin: 0 }}>{p.title}</div>
+      </div>
+      {p.shared && <div className="ap-hint">{p.shared}</div>}
+
+      {p.image && (
+        <div className="form-field" style={{ marginBottom: 14 }}>
+          <label>{p.imageLabel || 'Image'}</label>
+          <div style={{ marginTop: 7 }}>
+            <ImageField value={settings?.[p.image]} onChange={(v) => setS(p.image, v)} upload={upload} small />
+          </div>
+        </div>
+      )}
+
+      <div className="form-grid" style={{ gap: 12 }}>
+        {p.fields.map(([key, label, type]) => (
+          <div key={key} className="form-field">
+            <label>{label}</label>
+            {type === 'textarea'
+              ? <textarea className="admin-textarea" style={{ marginTop: 6 }} value={content[key] ?? ''} onChange={(e) => setC(key, e.target.value)} />
+              : <input className="admin-input" style={{ marginTop: 6 }} value={content[key] ?? ''} onChange={(e) => setC(key, e.target.value)} />}
+          </div>
+        ))}
+      </div>
+
+      {p.bg && (
+        <div className="sec-settings" style={{ marginTop: 14 }}>
+          <label>Background</label>
+          <div className="seg">
+            <button className={bgNow === 'white' ? 'on' : ''} onClick={() => sectionBg(id, 'white')}>White</button>
+            <button className={bgNow === 'cream' ? 'on' : ''} onClick={() => sectionBg(id, 'cream')}>Cream</button>
+          </div>
+        </div>
+      )}
+
+      {p.heroOpts && (
+        <div className="form-grid ap-two" style={{ marginTop: 14 }}>
+          <div className="form-field"><label>Hero height</label>
+            <select className="admin-input" style={{ marginTop: 6 }} value={content.theme_hero_height} onChange={(e) => setC('theme_hero_height', e.target.value)}>
+              <option value="standard">Standard</option><option value="tall">Tall</option></select></div>
+          <div className="form-field"><label>Photo tint</label>
+            <select className="admin-input" style={{ marginTop: 6 }} value={content.theme_hero_overlay} onChange={(e) => setC('theme_hero_overlay', e.target.value)}>
+              <option value="light">Light</option><option value="medium">Medium</option><option value="dark">Dark</option></select></div>
+          <div className="form-field"><label>Booking form side</label>
+            <select className="admin-input" style={{ marginTop: 6 }} value={content.theme_hero_form} onChange={(e) => setC('theme_hero_form', e.target.value)}>
+              <option value="right">Right</option><option value="left">Left</option></select></div>
+        </div>
+      )}
+
+      {p.manage && (
+        <button className="admin-btn ghost" style={{ marginTop: 16 }} onClick={() => setTab(p.manage.tab)}>{p.manage.label} →</button>
+      )}
+    </div>
+  );
+}
+
+function AppearanceEditor({ api, setTab, upload }) {
+  const [content, setContent] = useState(null); // all content keys except home_layout
+  const [settings, setSettings] = useState(null); // for hero/about images
   const [layout, setLayout] = useState(null);
+  const [dirty, setDirty] = useState({}); // content keys changed
+  const [settingsDirty, setSettingsDirty] = useState(false);
   const [err, setErr] = useState(null);
   const [note, setNote] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -618,9 +730,13 @@ function AppearanceEditor({ api }) {
   const [dragId, setDragId] = useState(null);
   const [scale, setScale] = useState(1);
   const [selectedSec, setSelectedSec] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editingSec, setEditingSec] = useState(null);
   const dragRef = useRef(null);
   const roRef = useRef(null);
   const iframeRef = useRef(null);
+  const editModeRef = useRef(false);
+  editModeRef.current = editMode;
 
   // Scale the desktop (1280px) preview down to fit the column width.
   const setWrap = useCallback((node) => {
@@ -633,12 +749,18 @@ function AppearanceEditor({ api }) {
     roRef.current = ro;
   }, [device]);
 
-  // Click a section in the preview → select its row here.
+  // Click a section in the preview → select it (edit mode → open its panel).
   useEffect(() => {
     const onMsg = (e) => {
-      if (e.data?.type === 'ts-select-section') {
-        setSelectedSec(e.data.id);
-        document.querySelector(`[data-secrow="${e.data.id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (e.data?.type !== 'ts-select-section') return;
+      const id = e.data.id;
+      setSelectedSec(id);
+      iframeRef.current?.contentWindow?.postMessage({ type: 'ts-highlight', id }, '*');
+      if (editModeRef.current) {
+        setEditingSec(id);
+        document.querySelector('.appearance-cols')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        document.querySelector(`[data-secrow="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     };
     window.addEventListener('message', onMsg);
@@ -646,25 +768,31 @@ function AppearanceEditor({ api }) {
   }, []);
 
   useEffect(() => {
-    api({ action: 'list', table: 'content' })
-      .then(({ data }) => {
-        const merged = {};
-        for (const k of THEME_KEYS) merged[k] = DEFAULT_CONTENT[k];
+    Promise.all([
+      api({ action: 'list', table: 'content' }),
+      api({ action: 'list', table: 'settings' }),
+    ])
+      .then(([cRes, sRes]) => {
+        const merged = { ...DEFAULT_CONTENT };
         let rawLayout = DEFAULT_CONTENT.home_layout;
-        for (const row of data) {
-          if (THEME_KEYS.includes(row.key)) merged[row.key] = row.value;
+        for (const row of cRes.data) {
+          merged[row.key] = row.value;
           if (row.key === 'home_layout') rawLayout = row.value;
         }
-        setVals(merged);
+        delete merged.home_layout;
+        setContent(merged);
         setLayout(parseLayout(rawLayout));
+        setSettings(sRes.data?.[0] || { id: 1 });
       })
       .catch((e) => setErr(e.message));
   }, [api]);
 
   if (err) return <SchemaHint title="Appearance" err={err} />;
-  if (!vals || !layout) return <p className="admin-note">Loading…</p>;
+  if (!content || !layout || !settings) return <p className="admin-note">Loading…</p>;
 
-  const set = (k) => (e) => setVals({ ...vals, [k]: e.target.value });
+  const setC = (key, val) => { setContent((c) => ({ ...c, [key]: val })); setDirty((d) => ({ ...d, [key]: true })); };
+  const set = (k) => (e) => setC(k, e.target.value);
+  const setS = (key, val) => { setSettings((s) => ({ ...s, [key]: val })); setSettingsDirty(true); };
   const meta = (id) => HOME_SECTIONS.find((s) => s.id === id) || { label: id };
 
   function toggle(id) {
@@ -674,9 +802,15 @@ function AppearanceEditor({ api }) {
   function setBg(id, bg) {
     setLayout(layout.map((r) => (r.id === id ? { ...r, bg } : r)));
   }
-  function highlightInPreview(id) {
+  function openSection(id) {
     setSelectedSec(id);
     iframeRef.current?.contentWindow?.postMessage({ type: 'ts-highlight', id }, '*');
+    if (editMode) setEditingSec(id);
+  }
+  function toggleEditMode() {
+    const n = !editMode;
+    setEditMode(n);
+    if (!n) setEditingSec(null);
   }
   function move(index, dir) {
     const to = index + dir;
@@ -697,210 +831,217 @@ function AppearanceEditor({ api }) {
   }
 
   async function save() {
-    if (!HEX_RE.test(vals.theme_brand) || !HEX_RE.test(vals.theme_brand_deep)) {
+    if (!HEX_RE.test(content.theme_brand) || !HEX_RE.test(content.theme_brand_deep) || !HEX_RE.test(content.theme_cream || '#faf8f3')) {
       setNote({ ok: false, text: 'Colors must be valid hex values like #F5B301.' });
       return;
     }
     setBusy(true); setNote(null);
     try {
-      const rows = THEME_KEYS.map((key) => ({ key, value: vals[key] }));
+      const rows = Object.keys(dirty).map((key) => ({ key, value: String(content[key] ?? '') }));
       rows.push({ key: 'home_layout', value: JSON.stringify(layout) });
       await api({ action: 'upsert', table: 'content', rows });
-      setNote({ ok: true, text: 'Saved — preview updated below.' });
+      if (settingsDirty) await api({ action: 'upsert', table: 'settings', rows: { ...settings, id: 1 } });
+      setDirty({}); setSettingsDirty(false);
+      setNote({ ok: true, text: 'Saved — preview updated.' });
       setPreviewKey((k) => k + 1); // reload the iframe (cache purged on save)
     } catch (e) { setNote({ ok: false, text: e.message }); }
     setBusy(false);
   }
 
   function reset() {
-    const d = {};
-    for (const k of THEME_KEYS) d[k] = DEFAULT_CONTENT[k];
-    setVals(d);
+    setContent((c) => { const n = { ...c }; for (const k of THEME_KEYS) n[k] = DEFAULT_CONTENT[k]; return n; });
+    setDirty((d) => { const n = { ...d }; for (const k of THEME_KEYS) n[k] = true; return n; });
     setLayout(defaultLayout());
-    setNote({ ok: true, text: 'Reset to defaults — hit Save to apply.' });
+    setNote({ ok: true, text: 'Reset styling to defaults — hit Save to apply.' });
   }
 
-  const radius = vals.theme_btn_shape === 'rounded' ? 12 : 999;
+  const radius = content.theme_btn_shape === 'rounded' ? 12 : 999;
   const isMobile = device === 'mobile';
   const frameScale = isMobile ? 1 : scale;
+  const editingRow = editingSec ? layout.find((r) => r.id === editingSec) : null;
 
   return (
     <>
       <h1 className="admin-title">Appearance</h1>
-      <p className="admin-sub">Reorder or hide homepage sections, change colors &amp; placements — then Save to publish.</p>
+      <p className="admin-sub">Turn on <b>Edit website</b>, then click any section in the preview to edit its content, images &amp; colours — just like a page builder.</p>
 
       <div className="admin-toolbar" style={{ position: 'sticky', top: 0, zIndex: 5, background: '#f6f4ee', padding: '8px 0' }}>
         <button className="admin-btn" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save & publish'}</button>
-        <button className="admin-btn ghost" onClick={reset} disabled={busy}>Reset to default</button>
+        <button className="admin-btn ghost" onClick={reset} disabled={busy}>Reset styling</button>
         {note && <span className={`admin-note ${note.ok ? 'ok' : 'err'}`}>{note.text}</span>}
       </div>
 
       <div className="appearance-cols">
         {/* ---- Left: controls ---- */}
         <div>
-          <div className="admin-card">
-            <div className="ap-h">Homepage sections</div>
-            <div className="ap-hint">Drag to reorder, or use the arrows. Toggle the eye to show / hide a section. The hero stays on top.</div>
-            <div className="sec-list">
-              {layout.map((row, i) => {
-                const m = meta(row.id);
-                const open = selectedSec === row.id;
-                return (
-                  <div
-                    key={row.id}
-                    data-secrow={row.id}
-                    className={`sec-row ${row.v ? '' : 'hidden'} ${dragId === row.id ? 'dragging' : ''} ${m.locked ? 'locked' : ''} ${open ? 'selected' : ''}`}
-                    draggable={!m.locked}
-                    onDragStart={() => { setDragId(row.id); dragRef.current = row.id; }}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => onDrop(row.id)}
-                    onDragEnd={() => { setDragId(null); dragRef.current = null; }}
-                  >
-                    <div className="sec-main">
-                      <span className="sec-handle" aria-hidden="true">{m.locked ? '★' : '⋮⋮'}</span>
-                      <button className="sec-label" onClick={() => highlightInPreview(row.id)} title="Select & highlight in preview">
-                        {m.label}{m.locked && <em> · fixed</em>}
-                      </button>
-                      <span className="sec-tools">
-                        <button className="sec-btn" onClick={() => move(i, -1)} disabled={i <= 1} aria-label="Move up">↑</button>
-                        <button className="sec-btn" onClick={() => move(i, 1)} disabled={i === 0 || i === layout.length - 1} aria-label="Move down">↓</button>
-                        <button
-                          className={`sec-eye ${row.v ? 'on' : 'off'}`}
-                          onClick={() => toggle(row.id)}
-                          disabled={m.locked}
-                          aria-label={row.v ? 'Hide section' : 'Show section'}
-                          title={m.locked ? 'Always shown' : row.v ? 'Visible — click to hide' : 'Hidden — click to show'}
-                        >{row.v ? '👁' : '🚫'}</button>
-                      </span>
-                    </div>
-                    {open && (
-                      <div className="sec-settings">
-                        {m.bg ? (
-                          <>
-                            <label>Background</label>
-                            <div className="seg">
-                              <button className={(row.bg || m.bg) === 'white' ? 'on' : ''} onClick={() => setBg(row.id, 'white')}>White</button>
-                              <button className={(row.bg || m.bg) === 'cream' ? 'on' : ''} onClick={() => setBg(row.id, 'cream')}>Cream</button>
-                            </div>
-                          </>
-                        ) : (
-                          <span className="ap-hint" style={{ margin: 0 }}>
-                            {m.locked ? 'Always shown at the top. Its colours follow the global theme.' : 'This section’s colours follow the global theme (edit them below).'}
+          {editingSec ? (
+            <SectionPanel
+              id={editingSec}
+              content={content}
+              setC={setC}
+              settings={settings}
+              setS={setS}
+              layoutRow={editingRow}
+              sectionBg={setBg}
+              meta={meta}
+              upload={upload}
+              setTab={setTab}
+              onBack={() => setEditingSec(null)}
+            />
+          ) : (
+            <>
+              {editMode && (
+                <div className="edit-hint">👆 Click a section in the preview to edit it, or pick one below.</div>
+              )}
+              <div className="admin-card">
+                <div className="ap-h">Homepage sections</div>
+                <div className="ap-hint">Drag to reorder or use the arrows; eye toggles show / hide. In <b>Edit website</b> mode, click a name to edit that section.</div>
+                <div className="sec-list">
+                  {layout.map((row, i) => {
+                    const m = meta(row.id);
+                    const open = selectedSec === row.id;
+                    return (
+                      <div
+                        key={row.id}
+                        data-secrow={row.id}
+                        className={`sec-row ${row.v ? '' : 'hidden'} ${dragId === row.id ? 'dragging' : ''} ${m.locked ? 'locked' : ''} ${open ? 'selected' : ''}`}
+                        draggable={!m.locked}
+                        onDragStart={() => { setDragId(row.id); dragRef.current = row.id; }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => onDrop(row.id)}
+                        onDragEnd={() => { setDragId(null); dragRef.current = null; }}
+                      >
+                        <div className="sec-main">
+                          <span className="sec-handle" aria-hidden="true">{m.locked ? '★' : '⋮⋮'}</span>
+                          <button className="sec-label" onClick={() => openSection(row.id)} title="Select / edit this section">
+                            {m.label}{m.locked && <em> · fixed</em>}
+                          </button>
+                          <span className="sec-tools">
+                            {SECTION_PANELS[row.id] && <button className="sec-btn edit" onClick={() => { setEditMode(true); openSection(row.id); setEditingSec(row.id); }} aria-label="Edit section" title="Edit this section">✎</button>}
+                            <button className="sec-btn" onClick={() => move(i, -1)} disabled={i <= 1} aria-label="Move up">↑</button>
+                            <button className="sec-btn" onClick={() => move(i, 1)} disabled={i === 0 || i === layout.length - 1} aria-label="Move down">↓</button>
+                            <button
+                              className={`sec-eye ${row.v ? 'on' : 'off'}`}
+                              onClick={() => toggle(row.id)}
+                              disabled={m.locked}
+                              aria-label={row.v ? 'Hide section' : 'Show section'}
+                              title={m.locked ? 'Always shown' : row.v ? 'Visible — click to hide' : 'Hidden — click to show'}
+                            >{row.v ? '👁' : '🚫'}</button>
                           </span>
-                        )}
+                        </div>
                       </div>
-                    )}
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div className="ap-h">Colors</div>
+                <div className="form-grid">
+                  <div className="form-field">
+                    <label>Primary color (buttons, highlights, accents)</label>
+                    <div className="swatch-row" style={{ marginTop: 7 }}>
+                      <input type="color" value={HEX_RE.test(content.theme_brand) ? content.theme_brand : '#F5B301'}
+                        onChange={set('theme_brand')} aria-label="Primary color picker" />
+                      <input className="admin-input" style={{ maxWidth: 130 }} value={content.theme_brand} onChange={set('theme_brand')} />
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="admin-card">
-            <div className="ap-h">Colors</div>
-            <div className="form-grid">
-              <div className="form-field">
-                <label>Primary color (buttons, highlights, accents)</label>
-                <div className="swatch-row" style={{ marginTop: 7 }}>
-                  <input type="color" value={HEX_RE.test(vals.theme_brand) ? vals.theme_brand : '#F5B301'}
-                    onChange={set('theme_brand')} aria-label="Primary color picker" />
-                  <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand} onChange={set('theme_brand')} />
+                  <div className="form-field">
+                    <label>Dark accent (links, prices, small headings)</label>
+                    <div className="swatch-row" style={{ marginTop: 7 }}>
+                      <input type="color" value={HEX_RE.test(content.theme_brand_deep) ? content.theme_brand_deep : '#C98A00'}
+                        onChange={set('theme_brand_deep')} aria-label="Dark accent color picker" />
+                      <input className="admin-input" style={{ maxWidth: 130 }} value={content.theme_brand_deep} onChange={set('theme_brand_deep')} />
+                    </div>
+                  </div>
+                  <div className="form-field">
+                    <label>Light section background (tinted bands)</label>
+                    <div className="swatch-row" style={{ marginTop: 7 }}>
+                      <input type="color" value={HEX_RE.test(content.theme_cream) ? content.theme_cream : '#faf8f3'}
+                        onChange={set('theme_cream')} aria-label="Light section background picker" />
+                      <input className="admin-input" style={{ maxWidth: 130 }} value={content.theme_cream} onChange={set('theme_cream')} />
+                    </div>
+                  </div>
+                  <div className="theme-preview" style={{ background: content.theme_cream }}>
+                    <span style={{ display: 'inline-block', padding: '12px 24px', borderRadius: radius, background: content.theme_brand, color: '#14110a', font: '700 13px var(--sora)' }}>Book Now</span>
+                    <span style={{ display: 'inline-block', padding: '12px 24px', borderRadius: radius, background: '#14110a', color: '#fff', font: '700 13px var(--sora)' }}>Call Us</span>
+                    <span style={{ font: '800 15px var(--sora)', color: content.theme_brand_deep }}>₹13/KM</span>
+                  </div>
                 </div>
               </div>
-              <div className="form-field">
-                <label>Dark accent (links, prices, small headings)</label>
-                <div className="swatch-row" style={{ marginTop: 7 }}>
-                  <input type="color" value={HEX_RE.test(vals.theme_brand_deep) ? vals.theme_brand_deep : '#C98A00'}
-                    onChange={set('theme_brand_deep')} aria-label="Dark accent color picker" />
-                  <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_brand_deep} onChange={set('theme_brand_deep')} />
+
+              <div className="admin-card">
+                <div className="ap-h">Buttons &amp; cards</div>
+                <div className="form-grid ap-two">
+                  <div className="form-field">
+                    <label>Button shape</label>
+                    <select className="admin-input" style={{ marginTop: 7 }} value={content.theme_btn_shape} onChange={set('theme_btn_shape')}>
+                      <option value="pill">Pill (fully rounded)</option>
+                      <option value="rounded">Rounded rectangle</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label>Button size</label>
+                    <select className="admin-input" style={{ marginTop: 7 }} value={content.theme_btn_size} onChange={set('theme_btn_size')}>
+                      <option value="normal">Normal</option>
+                      <option value="large">Large</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label>Card corners</label>
+                    <select className="admin-input" style={{ marginTop: 7 }} value={content.theme_card_radius} onChange={set('theme_card_radius')}>
+                      <option value="sharp">Sharp</option>
+                      <option value="soft">Soft (default)</option>
+                      <option value="round">Very round</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label>Section spacing</label>
+                    <select className="admin-input" style={{ marginTop: 7 }} value={content.theme_section_pad} onChange={set('theme_section_pad')}>
+                      <option value="compact">Compact</option>
+                      <option value="normal">Normal</option>
+                      <option value="roomy">Roomy</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-              <div className="form-field">
-                <label>Light section background (tinted bands)</label>
-                <div className="swatch-row" style={{ marginTop: 7 }}>
-                  <input type="color" value={HEX_RE.test(vals.theme_cream) ? vals.theme_cream : '#faf8f3'}
-                    onChange={set('theme_cream')} aria-label="Light section background picker" />
-                  <input className="admin-input" style={{ maxWidth: 130 }} value={vals.theme_cream} onChange={set('theme_cream')} />
+
+              <div className="admin-card">
+                <div className="ap-h">Hero &amp; placement</div>
+                <div className="form-grid ap-two">
+                  <div className="form-field">
+                    <label>Hero height</label>
+                    <select className="admin-input" style={{ marginTop: 7 }} value={content.theme_hero_height} onChange={set('theme_hero_height')}>
+                      <option value="standard">Standard</option>
+                      <option value="tall">Tall</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label>Hero photo tint</label>
+                    <select className="admin-input" style={{ marginTop: 7 }} value={content.theme_hero_overlay} onChange={set('theme_hero_overlay')}>
+                      <option value="light">Light</option>
+                      <option value="medium">Medium</option>
+                      <option value="dark">Dark</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label>Hero — booking form side</label>
+                    <select className="admin-input" style={{ marginTop: 7 }} value={content.theme_hero_form} onChange={set('theme_hero_form')}>
+                      <option value="right">Right</option>
+                      <option value="left">Left</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label>Floating call / WhatsApp</label>
+                    <select className="admin-input" style={{ marginTop: 7 }} value={content.theme_float_pos} onChange={set('theme_float_pos')}>
+                      <option value="right">Bottom right</option>
+                      <option value="left">Bottom left</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-              <div className="theme-preview" style={{ background: vals.theme_cream }}>
-                <span style={{ display: 'inline-block', padding: '12px 24px', borderRadius: radius, background: vals.theme_brand, color: '#14110a', font: '700 13px var(--sora)' }}>Book Now</span>
-                <span style={{ display: 'inline-block', padding: '12px 24px', borderRadius: radius, background: '#14110a', color: '#fff', font: '700 13px var(--sora)' }}>Call Us</span>
-                <span style={{ font: '800 15px var(--sora)', color: vals.theme_brand_deep }}>₹13/KM</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="admin-card">
-            <div className="ap-h">Buttons &amp; cards</div>
-            <div className="form-grid ap-two">
-              <div className="form-field">
-                <label>Button shape</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_btn_shape} onChange={set('theme_btn_shape')}>
-                  <option value="pill">Pill (fully rounded)</option>
-                  <option value="rounded">Rounded rectangle</option>
-                </select>
-              </div>
-              <div className="form-field">
-                <label>Button size</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_btn_size} onChange={set('theme_btn_size')}>
-                  <option value="normal">Normal</option>
-                  <option value="large">Large</option>
-                </select>
-              </div>
-              <div className="form-field">
-                <label>Card corners</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_card_radius} onChange={set('theme_card_radius')}>
-                  <option value="sharp">Sharp</option>
-                  <option value="soft">Soft (default)</option>
-                  <option value="round">Very round</option>
-                </select>
-              </div>
-              <div className="form-field">
-                <label>Section spacing</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_section_pad} onChange={set('theme_section_pad')}>
-                  <option value="compact">Compact</option>
-                  <option value="normal">Normal</option>
-                  <option value="roomy">Roomy</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="admin-card">
-            <div className="ap-h">Hero &amp; placement</div>
-            <div className="form-grid ap-two">
-              <div className="form-field">
-                <label>Hero height</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_height} onChange={set('theme_hero_height')}>
-                  <option value="standard">Standard</option>
-                  <option value="tall">Tall</option>
-                </select>
-              </div>
-              <div className="form-field">
-                <label>Hero photo tint</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_overlay} onChange={set('theme_hero_overlay')}>
-                  <option value="light">Light</option>
-                  <option value="medium">Medium</option>
-                  <option value="dark">Dark</option>
-                </select>
-              </div>
-              <div className="form-field">
-                <label>Hero — booking form side</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_hero_form} onChange={set('theme_hero_form')}>
-                  <option value="right">Right</option>
-                  <option value="left">Left</option>
-                </select>
-              </div>
-              <div className="form-field">
-                <label>Floating call / WhatsApp</label>
-                <select className="admin-input" style={{ marginTop: 7 }} value={vals.theme_float_pos} onChange={set('theme_float_pos')}>
-                  <option value="right">Bottom right</option>
-                  <option value="left">Bottom left</option>
-                </select>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
 
         {/* ---- Right: live preview ---- */}
@@ -910,11 +1051,16 @@ function AppearanceEditor({ api }) {
             <span className="ap-device">
               <button className={device === 'desktop' ? 'on' : ''} onClick={() => setDevice('desktop')}>🖥 Desktop</button>
               <button className={device === 'mobile' ? 'on' : ''} onClick={() => setDevice('mobile')}>📱 Mobile</button>
+              <button className={editMode ? 'edit-on' : ''} onClick={toggleEditMode} title="Click sections in the preview to edit them">✎ Edit website</button>
               <button onClick={() => setPreviewKey((k) => k + 1)} title="Reload preview">⟳</button>
             </span>
           </div>
-          <div className="ap-hint" style={{ marginBottom: 10 }}>Click any section in the preview to select it on the left. Save to publish colour &amp; layout changes.</div>
-          <div className="ap-frame-wrap" ref={setWrap}>
+          <div className="ap-hint" style={{ marginBottom: 10 }}>
+            {editMode
+              ? 'Edit mode on — click any section in the preview to edit its content. Save to publish.'
+              : 'Turn on “Edit website”, then click a section in the preview to edit it. Save to publish.'}
+          </div>
+          <div className={`ap-frame-wrap ${editMode ? 'editing' : ''}`} ref={setWrap}>
             <div
               className="ap-frame"
               style={{ width: (isMobile ? 390 : 1280) * frameScale, height: 1600 * frameScale }}

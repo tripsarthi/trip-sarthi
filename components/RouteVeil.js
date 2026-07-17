@@ -8,7 +8,12 @@ import BrandLoader from './BrandLoader';
 export default function RouteVeil() {
   const [hide, setHide] = useState(false);
   useEffect(() => {
-    setHide(new URLSearchParams(window.location.search).get('admin-preview') === '1');
+    const { search, pathname } = window.location;
+    setHide(
+      new URLSearchParams(search).get('admin-preview') === '1' ||
+      pathname.startsWith('/admin') ||
+      pathname.startsWith('/editor')
+    );
   }, []);
   if (hide) return null;
   return <BrandLoader veil />;

@@ -34,6 +34,7 @@ export function Navbar({ c, active }) {
           <Image src="/logo.png" alt="Trip Sarthi logo" width={48} height={48} priority />
           <div style={{ lineHeight: 1 }}>
             <div className="brand-name">Trip <span>Sarthi</span></div>
+            <div className="brand-by">by Shan-e-Himachal</div>
             <div className="brand-sub">Cab &amp; Taxi Service</div>
           </div>
         </Link>

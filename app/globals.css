@@ -64,7 +64,7 @@ input, textarea, select { font-family: inherit; }
   display: inline-flex; align-items: center; justify-content: center; gap: 9px;
   background: var(--brand); color: var(--ink); border: none; border-radius: var(--btn-radius);
   font-family: var(--sora); font-weight: 700; font-size: var(--btn-fs, 14.5px); padding: var(--btn-pad, 14px 30px);
-  white-space: nowrap; box-shadow: 0 4px 14px rgba(20,17,10,.22); transition: transform .15s, box-shadow .15s;
+  white-space: nowrap; box-shadow: none; transition: transform .15s, box-shadow .15s;
 }
 .btn:hover { transform: translateY(-2px); color: var(--ink); }
 .btn:focus { outline: none; }
@@ -96,12 +96,12 @@ input, textarea, select { font-family: inherit; }
 .nav-links a:hover { color: #fff; }
 .nav-links a.active { color: var(--brand); border-bottom-color: var(--brand); }
 /* Book Now — glossy solid pill that reads crisply on the dark bar */
-.nav-cta {
+.nav-links a.nav-cta {
   margin-left: 10px; padding: 14px 32px; font-size: 15px; font-weight: 800;
-  color: #fff; text-shadow: 0 1px 2px rgba(20,17,10,.3);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 3px 12px rgba(0,0,0,.35);
+  color: var(--ink); border-bottom: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 3px 12px rgba(0,0,0,.35);
 }
-.nav-cta:hover { transform: translateY(-1px); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.34), 0 6px 18px rgba(0,0,0,.45); }
+.nav-links a.nav-cta:hover { transform: translateY(-1px); color: var(--ink); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 6px 18px rgba(0,0,0,.45); }
 
 /* ---------- Mobile hamburger + drawer ---------- */
 .mobile-nav { display: none; margin-left: auto; }
@@ -660,6 +660,9 @@ body.ts-preview [data-sec]:hover::after {
 .ed-note.err { color: #ff9d94; }
 .ed-save { border: none; border-radius: 9px; padding: 9px 20px; font: 700 14px var(--sora); background: var(--brand); color: var(--ink); white-space: nowrap; }
 .ed-save:disabled { opacity: .6; }
+.ed-reset { border: 1px solid rgba(255,255,255,.22); border-radius: 9px; padding: 8px 16px; font: 700 13.5px var(--sora); background: rgba(255,255,255,.06); color: #e6dfd2; white-space: nowrap; }
+.ed-reset:hover { background: rgba(255,255,255,.14); color: #fff; }
+.ed-reset:disabled { opacity: .5; }
 .ed-body { flex: 1; display: flex; min-height: 0; }
 .ed-left { width: 250px; flex: none; background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 14px 12px; overflow-y: auto; }
 .ed-side-h { font: 800 12px var(--manrope); letter-spacing: .1em; text-transform: uppercase; color: var(--mut-3); margin: 4px 6px 10px; }

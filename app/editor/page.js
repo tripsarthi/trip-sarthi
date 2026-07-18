@@ -207,6 +207,7 @@ function Editor({ session }) {
             <button onClick={() => setPreviewKey((k) => k + 1)} title="Reload preview">⟳</button>
           </span>
           {note && <span className={`ed-note ${note.ok ? 'ok' : 'err'}`}>{note.text}</span>}
+          <button className="ed-reset" onClick={resetToDefaults} disabled={busy} title="Reset theme & section layout to defaults">↺ Reset to defaults</button>
           <button className="ed-save" onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save & publish'}</button>
         </div>
       </header>

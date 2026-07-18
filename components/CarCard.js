@@ -1,4 +1,5 @@
 import Img from '@/components/Img';
+import BookButton from '@/components/BookButton';
 
 // Trip Sarthi car card: rounded, floating price pill, dot detail rows,
 // pill Book/Call buttons.
@@ -20,7 +21,7 @@ export default function CarCard({ car, c }) {
         <div className="note">{c.t.car_note}</div>
       </div>
       <div className="car3-cta">
-        <a href={c.wa} target="_blank" rel="noopener" className="book">Book Now</a>
+        <BookButton car={car} waNumber={c.settings.phone_e164} />
         <a href={c.tel} className="call">Call Now</a>
       </div>
     </div>

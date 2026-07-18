@@ -260,10 +260,26 @@ input, textarea, select { font-family: inherit; }
 .car3-body .row::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); flex: none; }
 .car3-body .note { font: 600 12.5px var(--manrope); color: var(--muted-2); margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line-3); }
 .car3-cta { display: flex; gap: 10px; padding: 18px 22px 22px; }
-.car3-cta a { flex: 1; text-align: center; padding: 12px; border-radius: var(--btn-radius); font: 700 13.5px var(--sora); }
+.car3-cta a, .car3-cta button { flex: 1; text-align: center; padding: 12px; border-radius: var(--btn-radius); font: 700 13.5px var(--sora); border: none; background: none; cursor: pointer; }
 .car3-cta .book { background: var(--brand); color: var(--ink); box-shadow: none; }
 .car3-cta .call { border: 1.5px solid #ddd6ca; color: var(--ink); }
 .car3-cta .call:hover { border-color: var(--ink); }
+
+/* Booking modal (car "Book Now") */
+.bm-overlay { position: fixed; inset: 0; z-index: 1400; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(10,8,4,.55); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.bm-card { position: relative; background: #fff; border-radius: 22px; padding: 30px 30px 28px; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; box-shadow: 0 30px 80px rgba(0,0,0,.4); animation: bm-in .22s ease both; }
+@keyframes bm-in { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+.bm-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--brand), #ffd75e); border-radius: 22px 22px 0 0; }
+.bm-close { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border: none; background: transparent; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; border-radius: 9px; }
+.bm-close:hover { background: var(--cream); color: var(--ink); }
+.bm-head { margin-bottom: 18px; padding-right: 30px; }
+.bm-kicker { font: 700 12px var(--manrope); letter-spacing: .16em; text-transform: uppercase; color: var(--brand-deep); margin-bottom: 6px; }
+.bm-head h3 { font: 800 24px var(--sora); color: var(--ink); margin: 0; }
+.bm-sub { font: 600 13.5px var(--manrope); color: var(--muted); margin-top: 4px; }
+.bm-form { display: grid; gap: 14px; }
+.bm-submit { width: 100%; padding: 14px; margin-top: 2px; }
+.bm-wa { text-align: center; font: 700 13px var(--manrope); color: var(--brand-deep); }
+.bm-wa:hover { color: var(--ink); }
 
 /* ---------- Popular places (pill chips) ---------- */
 .place-pills { display: flex; flex-wrap: wrap; gap: 13px; justify-content: center; max-width: 900px; margin: 0 auto; }

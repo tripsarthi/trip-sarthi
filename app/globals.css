@@ -64,7 +64,7 @@ input, textarea, select { font-family: inherit; }
   display: inline-flex; align-items: center; justify-content: center; gap: 9px;
   background: var(--brand); color: var(--ink); border: none; border-radius: var(--btn-radius);
   font-family: var(--sora); font-weight: 700; font-size: var(--btn-fs, 14.5px); padding: var(--btn-pad, 14px 30px);
-  box-shadow: 0 4px 14px rgba(20,17,10,.22); transition: transform .15s, box-shadow .15s;
+  white-space: nowrap; box-shadow: 0 4px 14px rgba(20,17,10,.22); transition: transform .15s, box-shadow .15s;
 }
 .btn:hover { transform: translateY(-2px); color: var(--ink); }
 .btn.dark { background: var(--ink); color: #fff; box-shadow: 0 8px 22px rgba(20,17,10,.3); }
@@ -89,11 +89,51 @@ input, textarea, select { font-family: inherit; }
 .brand-name span { color: var(--brand); }
 .brand-by { font: 600 10.5px var(--sora); color: var(--brand); margin-top: 3px; letter-spacing: .01em; font-style: italic; }
 .brand-sub { font: 700 10px var(--manrope); letter-spacing: .2em; text-transform: uppercase; color: var(--muted-2); margin-top: 3px; }
-.nav-links { display: flex; gap: 26px; margin-left: auto; align-items: center; flex-wrap: wrap; }
+.nav-links { display: flex; gap: 26px; margin-left: auto; align-items: center; }
 .nav-links a { font: 600 15px var(--manrope); color: #cfc8bc; padding: 8px 0; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
 .nav-links a:hover { color: #fff; }
 .nav-links a.active { color: var(--brand); border-bottom-color: var(--brand); }
-.nav-cta { margin-left: 4px; padding: 11px 22px; font-size: 13.5px; }
+/* Book Now — glossy solid pill that reads crisply on the dark bar */
+.nav-cta {
+  margin-left: 10px; padding: 11px 24px; font-size: 14px; font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 3px 12px rgba(0,0,0,.35);
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 6px 18px rgba(0,0,0,.45); }
+
+/* ---------- Mobile hamburger + drawer ---------- */
+.mobile-nav { display: none; margin-left: auto; }
+.hamburger {
+  display: inline-flex; flex-direction: column; justify-content: center; gap: 5px;
+  width: 46px; height: 46px; padding: 12px; background: transparent;
+  border: 1px solid var(--ink-line); border-radius: 12px; cursor: pointer;
+}
+.hamburger span { display: block; height: 2px; width: 100%; background: #fff; border-radius: 2px; transition: transform .25s, opacity .2s; }
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.mnav-overlay {
+  position: fixed; inset: 0; background: rgba(10,8,4,.55); backdrop-filter: blur(2px);
+  opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s; z-index: 1200;
+}
+.mnav-overlay.show { opacity: 1; visibility: visible; }
+.mnav-panel {
+  position: fixed; top: 0; right: 0; height: 100dvh; width: 80%; max-width: 320px;
+  background: var(--ink-2); border-left: 1px solid var(--ink-line);
+  display: flex; flex-direction: column; gap: 4px; padding: 74px 22px 28px;
+  transform: translateX(100%); transition: transform .28s ease; z-index: 1300;
+  box-shadow: -24px 0 60px rgba(0,0,0,.55); overflow-y: auto;
+}
+.mnav-panel.open { transform: none; }
+.mnav-panel a { font: 700 16px var(--manrope); color: #d8d1c6; padding: 15px 4px; border-bottom: 1px solid var(--ink-line); }
+.mnav-panel a:active { color: #fff; }
+.mnav-panel a.active { color: var(--brand); }
+.mnav-panel .mnav-cta { margin-top: 18px; justify-content: center; color: var(--ink); border-bottom: none; padding: 15px; font-size: 15px; }
+.mnav-close {
+  position: absolute; top: 18px; right: 18px; width: 40px; height: 40px;
+  background: transparent; border: none; color: #cfc8bc; font-size: 22px; line-height: 1; cursor: pointer; border-radius: 10px;
+}
+.mnav-close:hover { color: #fff; background: rgba(255,255,255,.06); }
 
 /* ---------- Home hero (dark + gold) ---------- */
 .hero3 { position: relative; background: var(--ink); overflow: hidden; }
@@ -429,10 +469,12 @@ body.ts-preview [data-sec]:hover::after {
   .rate-head { display: none; }
   .rate-row { grid-template-columns: 1fr 1fr; padding: 10px 0; }
 }
+/* Swap the full nav for a hamburger once the links get tight */
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .mobile-nav { display: block; }
+}
 @media (max-width: 620px) {
-  .nav-links { gap: 13px; }
-  .nav-links a { font-size: 13px; }
-  .nav-cta { display: none; }
   .svc-grid, .step-grid, .car-grid, .cards-3, .testi-grid, .why-grid, .icards, .form-2col, .est-form { grid-template-columns: 1fr; }
   .section2 { padding-top: 54px; padding-bottom: 54px; }
   .offer-inner { padding: 32px 26px; }

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import MobileMenu from './MobileMenu';
 
 const NAV = [
   ['Home', '/'],
@@ -45,6 +46,7 @@ export function Navbar({ c, active }) {
           ))}
           <a href={c.wa} target="_blank" rel="noopener" className="btn nav-cta">Book Now</a>
         </nav>
+        <MobileMenu nav={NAV} active={active} waHref={c.wa} />
       </div>
     </header>
   );

@@ -31,10 +31,11 @@ export default async function Contact() {
               <span className="icon soft">@</span>
               <div><div className="t">Email</div><div className="s">{c.email}</div></div>
             </a>
-            <div className="contact-card">
+            <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}`}
+               target="_blank" rel="noopener" className="contact-card">
               <span className="icon soft">◉</span>
               <div><div className="t">Head Office</div><div className="s">{c.address}</div></div>
-            </div>
+            </a>
           </div>
 
           <ContactForm waNumber={c.settings.phone_e164} title={t.form_title} sub={t.form_sub} />

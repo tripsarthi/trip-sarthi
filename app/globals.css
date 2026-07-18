@@ -273,7 +273,7 @@ input, textarea, select { font-family: inherit; }
 .car3-cta { display: flex; gap: 10px; padding: 18px 22px 22px; }
 .car3-cta a, .car3-cta button { flex: 1; text-align: center; padding: 12px; border-radius: var(--btn-radius); font: 700 13.5px var(--sora); border: none; background: none; cursor: pointer; transition: background .16s, color .16s, transform .16s, box-shadow .16s, border-color .16s; }
 .car3-cta .book { background: var(--brand); color: var(--ink); box-shadow: none; }
-.car3-cta .book:hover { background: var(--brand-deep); color: var(--ink); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(20,17,10,.2); }
+.car3-cta .book:hover { background: #ffd75e; color: var(--ink); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(245,179,1,.35); }
 .car3-cta .call { border: 1.5px solid #ddd6ca; color: var(--ink); }
 .car3-cta .call:hover { border-color: var(--ink); transform: translateY(-2px); }
 

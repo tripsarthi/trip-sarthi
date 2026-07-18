@@ -1,6 +1,7 @@
 import { getContent } from '@/lib/db';
 import { Shell, OfferBand } from '@/components/SiteChrome';
 import Img from '@/components/Img';
+import { waMsg } from '@/lib/waMessages';
 
 export const revalidate = 3600;
 export const metadata = {
@@ -40,7 +41,7 @@ export default async function Himachal() {
             <h1>{t.himachal_h1}</h1>
             <p>{t.himachal_sub}</p>
             <div className="dest-hero-ctas">
-              <a href={c.wa} target="_blank" rel="noopener" className="btn">Plan my Himachal trip</a>
+              <a href={c.waFor(waMsg.himachalPlan)} target="_blank" rel="noopener" className="btn">Plan my Himachal trip</a>
               <a href={c.tel} className="btn ghost">Call {c.phone}</a>
             </div>
           </div>
@@ -63,7 +64,7 @@ export default async function Himachal() {
             </div>
             <div className="dest-grid">
               {DESTINATIONS.map((d) => (
-                <a key={d.name} href={c.wa} target="_blank" rel="noopener" className="dest-card">
+                <a key={d.name} href={c.waFor(waMsg.himachalDest(d))} target="_blank" rel="noopener" className="dest-card">
                   <Img src={d.img} alt={d.name} sizes="(max-width: 620px) 100vw, (max-width: 1000px) 50vw, 33vw" />
                   <div className="shade" />
                   <div className="info">

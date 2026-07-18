@@ -6,6 +6,7 @@ import CarCard from '@/components/CarCard';
 import Img from '@/components/Img';
 import PreviewBridge from '@/components/PreviewBridge';
 import { parseLayout } from '@/lib/homeLayout';
+import { waMsg } from '@/lib/waMessages';
 
 // Pages are statically cached; the admin API purges the cache on every save,
 // so edits still go live instantly.
@@ -37,7 +38,7 @@ const SECTIONS = {
               <span className="ic"><CallIcon /></span>{c.phone}
             </a>
             <div className="hero3-ctas">
-              <a href={c.wa} target="_blank" rel="noopener" className="btn">{t.home_cta}</a>
+              <a href={c.waFor(waMsg.homeEstimate)} target="_blank" rel="noopener" className="btn">{t.home_cta}</a>
               <a href={c.tel} className="btn ghost">Call Us</a>
             </div>
             <div className="stat-chips">
@@ -165,7 +166,7 @@ const SECTIONS = {
         </div>
         <div className="place-pills">
           {c.routes.map((r) => (
-            <a key={r.id} href={c.wa} target="_blank" rel="noopener" className="place-pill">
+            <a key={r.id} href={c.waFor(waMsg.route(r))} target="_blank" rel="noopener" className="place-pill">
               {r.title.replace('→', 'to')}
               <span className="price">{r.price}</span>
               <span className="arrow">→</span>

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { waMsg } from '@/lib/waMessages';
 
 // Car-card "Book Now": opens a booking modal pre-filled with this specific car
 // and submits a real enquiry (POST /api/enquiries), instead of jumping to
@@ -60,10 +61,7 @@ export default function BookButton({ car, waNumber }) {
     }
   }
 
-  const waText = encodeURIComponent(
-    `Hi Trip Sarthi, I'd like to book the ${car.name}${car.model ? ` (${car.model})` : ''}.`
-  );
-  const waLink = `https://wa.me/${(waNumber || '').replace(/[^0-9]/g, '')}?text=${waText}`;
+  const waLink = `https://wa.me/${(waNumber || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMsg.car(car))}`;
 
   const modal = (
     <div className="bm-overlay" onClick={close}>

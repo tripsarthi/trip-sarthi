@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import MobileMenu from './MobileMenu';
+import { waMsg } from '@/lib/waMessages';
 
 const NAV = [
   ['Home', '/'],
@@ -44,9 +45,9 @@ export function Navbar({ c, active }) {
             <Link key={href} href={href} className={active === href ? 'active' : ''}
               aria-current={active === href ? 'page' : undefined}>{label}</Link>
           ))}
-          <a href={c.wa} target="_blank" rel="noopener" className="btn nav-cta">Book Now</a>
+          <a href={c.waFor(waMsg.navBook)} target="_blank" rel="noopener" className="btn nav-cta">Book Now</a>
         </nav>
-        <MobileMenu nav={NAV} active={active} waHref={c.wa} />
+        <MobileMenu nav={NAV} active={active} waHref={c.waFor(waMsg.navBook)} />
       </div>
     </header>
   );
@@ -70,10 +71,10 @@ export function OfferBand({ c }) {
       <div className="offer-inner">
         <div>
           <h2>{c.t.offer_title}</h2>
-          <a href={c.wa} target="_blank" rel="noopener" className="btn dark">{c.t.offer_cta}</a>
+          <a href={c.waFor(waMsg.offerClaim)} target="_blank" rel="noopener" className="btn dark">{c.t.offer_cta}</a>
         </div>
         <div className="offer-right">
-          <a href={c.wa} target="_blank" rel="noopener" className="wa-btn">
+          <a href={c.waFor(waMsg.offerChat)} target="_blank" rel="noopener" className="wa-btn">
             <WaIcon />
             <span>Whatsapp<span className="sub">Chat with us now</span></span>
           </a>
@@ -87,7 +88,7 @@ export function FloatingContact({ c }) {
   return (
     <div className={`float-contact ${c.t.theme_float_pos === 'left' ? 'left' : ''}`}>
       <a href={c.tel} className="fc-call" aria-label={`Call ${c.phone}`}><CallIcon /></a>
-      <a href={c.wa} target="_blank" rel="noopener" className="fc-wa" aria-label="Chat on WhatsApp"><WaIcon /></a>
+      <a href={c.waFor(waMsg.floatingChat)} target="_blank" rel="noopener" className="fc-wa" aria-label="Chat on WhatsApp"><WaIcon /></a>
     </div>
   );
 }

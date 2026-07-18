@@ -1,6 +1,7 @@
 import { getContent } from '@/lib/db';
 import { Shell, PageBanner } from '@/components/SiteChrome';
 import ContactForm from '@/components/ContactForm';
+import { waMsg } from '@/lib/waMessages';
 
 export const revalidate = 3600;
 export const metadata = {
@@ -18,7 +19,7 @@ export default async function Contact() {
 
         <section className="wrap contact-grid">
           <div className="contact-cards">
-            <a href={c.wa} target="_blank" rel="noopener" className="contact-card">
+            <a href={c.waFor(waMsg.contactCard)} target="_blank" rel="noopener" className="contact-card">
               <span className="icon dark">WA</span>
               <div><div className="t">WhatsApp</div><div className="s">{c.phone} — tap to chat</div></div>
             </a>

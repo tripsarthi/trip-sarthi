@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { waMsg } from '@/lib/waMessages';
 
 export default function ContactForm({ waNumber, title, sub }) {
   const [form, setForm] = useState({ name: '', phone: '', from_city: 'New Delhi', to_city: '', message: '' });
@@ -8,10 +9,7 @@ export default function ContactForm({ waNumber, title, sub }) {
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
-  const waText = encodeURIComponent(
-    `Hi Trip Sarthi, I'd like a quote.\nName: ${form.name}\nPhone: ${form.phone}\nFrom: ${form.from_city}\nTo: ${form.to_city}\n${form.message}`
-  );
-  const waLink = `https://wa.me/${(waNumber || '').replace(/[^0-9]/g, '')}?text=${waText}`;
+  const waLink = `https://wa.me/${(waNumber || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waMsg.contactForm(form))}`;
 
   async function submit(e) {
     e.preventDefault();

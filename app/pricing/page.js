@@ -1,5 +1,6 @@
 import { getContent } from '@/lib/db';
 import { Shell, PageBanner, OfferBand } from '@/components/SiteChrome';
+import { waMsg } from '@/lib/waMessages';
 
 export const revalidate = 3600;
 export const metadata = {
@@ -27,7 +28,7 @@ export default async function Pricing() {
                 <div className="c-model">{car.model}</div>
                 <div className="c-seats">{car.seats} seats</div>
                 <div className="c-rate">₹{car.rate}/km</div>
-                <div className="c-cta"><a href={c.wa} target="_blank" rel="noopener">Book</a></div>
+                <div className="c-cta"><a href={c.waFor(waMsg.pricingCar(car))} target="_blank" rel="noopener">Book</a></div>
               </div>
             ))}
           </div>
@@ -40,7 +41,7 @@ export default async function Pricing() {
                 <div className="m">{r.meta}</div>
                 <div className="foot">
                   <span className="price">{r.price}</span>
-                  <a href={c.wa} target="_blank" rel="noopener" className="book">Book →</a>
+                  <a href={c.waFor(waMsg.pricingFare(r))} target="_blank" rel="noopener" className="book">Book →</a>
                 </div>
               </div>
             ))}

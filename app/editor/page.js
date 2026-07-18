@@ -179,6 +179,16 @@ function Editor({ session }) {
     setBusy(false);
   }
 
+  // Reset theme (colours, buttons, hero) and the section layout to defaults.
+  // Only applies once the user hits Save & publish, so it's easy to back out of.
+  function resetToDefaults() {
+    if (!confirm('Reset all theme settings and the homepage section layout to defaults? Nothing is saved until you hit “Save & publish”.')) return;
+    setContent((c) => { const n = { ...c }; for (const k of THEME_KEYS) n[k] = DEFAULT_CONTENT[k]; return n; });
+    setDirty((d) => { const n = { ...d }; for (const k of THEME_KEYS) n[k] = true; return n; });
+    setLayout(defaultLayout());
+    setNote({ ok: true, text: 'Reset to defaults — hit Save & publish to apply.' });
+  }
+
   const isMobile = device === 'mobile';
   const frameScale = isMobile ? 1 : scale;
 
@@ -249,7 +259,7 @@ function Editor({ session }) {
         {/* Right: contextual settings */}
         <aside className="ed-right">
           {selected === 'theme'
-            ? <ThemePanel content={content} set={set} />
+            ? <ThemePanel content={content} set={set} onReset={resetToDefaults} />
             : <SectionSettings id={selected} content={content} setC={setC} settings={settings} setS={setS}
                 layoutRow={layout.find((r) => r.id === selected)} setBg={setBg} meta={meta} upload={upload} />}
         </aside>
@@ -319,7 +329,7 @@ function SectionSettings({ id, content, setC, settings, setS, layoutRow, setBg, 
   );
 }
 
-function ThemePanel({ content, set }) {
+function ThemePanel({ content, set, onReset }) {
   const radius = content.theme_btn_shape === 'rounded' ? 12 : 999;
   return (
     <div className="ed-panel">
@@ -385,6 +395,10 @@ function ThemePanel({ content, set }) {
           <select className="admin-input" style={{ marginTop: 6 }} value={content.theme_float_pos} onChange={set('theme_float_pos')}>
             <option value="right">Bottom right</option><option value="left">Bottom left</option></select></div>
       </div>
+
+      <div className="ed-group">Reset</div>
+      <p className="ap-hint" style={{ marginTop: 0 }}>Restore all colours, buttons, hero and the section layout to the original defaults.</p>
+      <button type="button" className="admin-btn ghost" style={{ marginTop: 4 }} onClick={onReset}>↺ Reset to default settings</button>
     </div>
   );
 }

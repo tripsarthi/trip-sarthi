@@ -43,11 +43,11 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: #fff; color: #1c1917; font-family: var(--manrope); -webkit-font-smoothing: antialiased; }
-a { color: var(--brand-deep); text-decoration: none; }
+a { color: var(--brand-deep); text-decoration: none; -webkit-tap-highlight-color: transparent; }
 a:hover { color: var(--ink); }
 ::selection { background: var(--brand); color: var(--ink); }
 img { max-width: 100%; }
-button { font-family: inherit; cursor: pointer; }
+button { font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 input, textarea, select { font-family: inherit; }
 
 @keyframes tsfade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -67,6 +67,8 @@ input, textarea, select { font-family: inherit; }
   white-space: nowrap; box-shadow: 0 4px 14px rgba(20,17,10,.22); transition: transform .15s, box-shadow .15s;
 }
 .btn:hover { transform: translateY(-2px); color: var(--ink); }
+.btn:focus { outline: none; }
+.btn:focus-visible { outline: 3px solid var(--brand-deep); outline-offset: 2px; }
 .btn.dark { background: var(--ink); color: #fff; box-shadow: 0 8px 22px rgba(20,17,10,.3); }
 .btn.dark:hover { color: #fff; }
 .btn.ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.4); box-shadow: none; }
@@ -95,10 +97,11 @@ input, textarea, select { font-family: inherit; }
 .nav-links a.active { color: var(--brand); border-bottom-color: var(--brand); }
 /* Book Now — glossy solid pill that reads crisply on the dark bar */
 .nav-cta {
-  margin-left: 10px; padding: 11px 24px; font-size: 14px; font-weight: 800;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 3px 12px rgba(0,0,0,.35);
+  margin-left: 10px; padding: 14px 32px; font-size: 15px; font-weight: 800;
+  color: #fff; text-shadow: 0 1px 2px rgba(20,17,10,.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 3px 12px rgba(0,0,0,.35);
 }
-.nav-cta:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 6px 18px rgba(0,0,0,.45); }
+.nav-cta:hover { transform: translateY(-1px); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.34), 0 6px 18px rgba(0,0,0,.45); }
 
 /* ---------- Mobile hamburger + drawer ---------- */
 .mobile-nav { display: none; margin-left: auto; }
